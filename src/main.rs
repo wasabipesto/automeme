@@ -8,23 +8,23 @@ fn index() -> &'static str {
     "Hello, world!"
 }
 
-#[get("/red")]
-async fn red() -> Option<NamedFile> {
-    let fractal_image = generate_image();
-    let temp_file = "image.png";
-    fractal_image.save(temp_file).ok()?;
-    NamedFile::open(temp_file).await.ok()
+#[get("/test_image")]
+async fn test_image() -> Option<NamedFile> {
+    let image = generate_image();
+    let filename = "image.png";
+    image.save(filename).ok()?;
+    NamedFile::open(filename).await.ok()
 }
 
 fn generate_image() -> RgbImage {
-    let mut img = RgbImage::new(200, 200);
-    for (_, _, pixel) in img.enumerate_pixels_mut() {
+    let mut image = RgbImage::new(200, 200);
+    for (_, _, pixel) in image.enumerate_pixels_mut() {
         *pixel = Rgb([255, 0, 0]);
     }
-    img
+    image
 }
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, red])
+    rocket::build().mount("/", routes![index, test_image])
 }
