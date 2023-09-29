@@ -8,5 +8,6 @@ license-file = "LICENSE"
 edition = "2021"
 
 [dependencies]
-rocket = "=0.5.0-rc.3"
-image = "0.24.7"
+actix-web = "4.4"
+image = "0.24"
+rand = "0.8"
