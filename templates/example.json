@@ -1,0 +1,15 @@
+{
+    "template_name": "example",
+    "text_fields": [
+        {
+            "font": "idk",
+            "color": "idk",
+            "size": 20,
+            "default_text": "idk",
+            "bound_x_left": 0,
+            "bound_x_right": 100,
+            "bound_y_bottom": 0,
+            "bound_y_top": 100
+        }
+    ]
+}
