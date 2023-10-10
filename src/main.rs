@@ -3,9 +3,13 @@ use image::{Rgb, RgbImage, DynamicImage};
 use rand::Rng;
 use std::collections::HashMap;
 use std::io::{Cursor, Seek};
+use std::fs::File;
+use std::io::Read;
 use serde::Deserialize;
 use serde_json;
 use glob::glob;
+extern crate fontdue;
+use fontdue::{Font, FontSettings};
 
 #[derive(Debug, Deserialize, Clone)]
 struct TemplateSimple {
@@ -42,6 +46,27 @@ fn load_templates() -> HashMap<String, Template> {
             let image_path = format!("templates/{}", template.image_filename);
             let image = image::open(image_path).expect("Failed to open image file");
             (template.template_name.clone(), Template { image, text_fields: template.text_fields })
+        })
+        .collect()
+}
+
+fn load_fonts() -> HashMap<String, Font> {
+    glob("fonts/*.ttf")
+        .expect("Failed to read glob pattern")
+        .filter_map(|entry| entry.ok())
+        .map(|file_path| {
+            let font_name = file_path
+                .file_stem()
+                .and_then(|stem| stem.to_str())
+                .expect("Failed to get file stem")
+                .to_owned();
+            let mut font_bytes = Vec::new();
+            File::open(&file_path)
+                .and_then(|mut font_file| font_file.read_to_end(&mut font_bytes))
+                .expect("Failed to read font file");
+            let font_data = Font::from_bytes(font_bytes, FontSettings::default())
+                .expect("Failed to load font data");
+            (font_name, font_data)
         })
         .collect()
 }
@@ -108,10 +133,13 @@ async fn main() -> std::io::Result<()> {
     println!("Server starting...");
     let templates = load_templates();
     println!("Loaded {} templates.", templates.len());
+    let fonts = load_fonts();
+    println!("Loaded {} fonts.", fonts.len());
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(templates.clone()))
+            .app_data(web::Data::new(fonts.clone()))
             .service(index)
             .service(template_test)
             .service(template_default)
