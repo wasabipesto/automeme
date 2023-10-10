@@ -10,38 +10,38 @@ use glob::glob;
 #[derive(Debug, Deserialize, Clone)]
 struct TemplateSimple {
     template_name: String,
+    image_filename: String,
     text_fields: Vec<TextField>,
 }
 
 #[derive(Debug, Clone)]
 struct Template {
-    template_name: String,
     image: DynamicImage,
     text_fields: Vec<TextField>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 struct TextField {
-    font: String,
-    color: String,
-    size: u32,
+    //font: String,
+    //color: String,
+    //size: u32,
     default_text: String,
-    bound_x_left: u32,
-    bound_x_right: u32,
-    bound_y_bottom: u32,
-    bound_y_top: u32,
+    x_start: u32,
+    y_start: u32,
+    x_space: u32,
+    y_space: u32,
 }
 
 fn load_templates() -> HashMap<String, Template> {
-    glob("templates/*.json")
+    glob("templates/*/*.json")
         .expect("Failed to read glob pattern")
         .filter_map(|entry| entry.ok())
         .map(|file_path| {
             let json_content = std::fs::read_to_string(&file_path).expect("Failed to read file");
             let template: TemplateSimple = serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
-            let image_path = format!("templates/{}.png", template.template_name);
+            let image_path = format!("templates/{}", template.image_filename);
             let image = image::open(image_path).expect("Failed to open image file");
-            (template.template_name.clone(), Template { template_name: template.template_name, image, text_fields: template.text_fields })
+            (template.template_name.clone(), Template { image, text_fields: template.text_fields })
         })
         .collect()
 }

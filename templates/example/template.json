@@ -1,15 +1,16 @@
 {
     "template_name": "example",
+    "image_filename": "example/image.png",
     "text_fields": [
         {
             "font": "idk",
             "color": "idk",
             "size": 20,
             "default_text": "idk",
-            "bound_x_left": 0,
-            "bound_x_right": 100,
-            "bound_y_bottom": 0,
-            "bound_y_top": 100
+            "x_start": 0,
+            "y_start": 0,
+            "x_space": 100,
+            "y_space": 100
         }
     ]
 }
