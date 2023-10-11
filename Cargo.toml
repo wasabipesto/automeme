@@ -9,9 +9,9 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4"
+fontdue = "0.7.3"
+glob = "0.3"
 image = "0.24"
 rand = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-glob = "0.3"
-fontdue = "0.7.3"

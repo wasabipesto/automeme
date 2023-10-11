@@ -1,15 +1,15 @@
-use actix_web::{get, web, App, HttpServer, HttpResponse, Responder};
-use image::{Rgb, RgbImage, DynamicImage};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use fontdue;
+use fontdue::{Font, FontSettings};
+use glob::glob;
+use image::{DynamicImage, Rgb, RgbImage};
 use rand::Rng;
-use std::collections::HashMap;
-use std::io::{Cursor, Seek};
-use std::fs::File;
-use std::io::Read;
 use serde::Deserialize;
 use serde_json;
-use glob::glob;
-extern crate fontdue;
-use fontdue::{Font, FontSettings};
+use std::collections::HashMap;
+use std::fs::File;
+use std::io::Read;
+use std::io::{Cursor, Seek};
 
 #[derive(Debug, Deserialize, Clone)]
 struct TemplateSimple {
@@ -30,10 +30,10 @@ struct TextField {
     //color: String,
     //size: u32,
     default_text: String,
-    x_start: u32,
-    y_start: u32,
-    x_space: u32,
-    y_space: u32,
+    //x_start: u32,
+    //y_start: u32,
+    //x_space: u32,
+    //y_space: u32,
 }
 
 fn load_templates() -> HashMap<String, Template> {
@@ -42,10 +42,17 @@ fn load_templates() -> HashMap<String, Template> {
         .filter_map(|entry| entry.ok())
         .map(|file_path| {
             let json_content = std::fs::read_to_string(&file_path).expect("Failed to read file");
-            let template: TemplateSimple = serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
+            let template: TemplateSimple =
+                serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
             let image_path = format!("templates/{}", template.image_filename);
             let image = image::open(image_path).expect("Failed to open image file");
-            (template.template_name.clone(), Template { image, text_fields: template.text_fields })
+            (
+                template.template_name.clone(),
+                Template {
+                    image,
+                    text_fields: template.text_fields,
+                },
+            )
         })
         .collect()
 }
@@ -80,7 +87,11 @@ fn generate_random_noise_image() -> DynamicImage {
 
     for y in 0..height {
         for x in 0..width {
-            let pixel = Rgb([rng.gen_range(0..=255), rng.gen_range(0..=255), rng.gen_range(0..=255)]);
+            let pixel = Rgb([
+                rng.gen_range(0..=255),
+                rng.gen_range(0..=255),
+                rng.gen_range(0..=255),
+            ]);
             image.put_pixel(x, y, pixel);
         }
     }
@@ -94,7 +105,9 @@ fn serve_image_to_client(image: DynamicImage) -> HttpResponse {
         .write_to(&mut png_data, image::ImageOutputFormat::Png)
         .expect("Failed to write PNG data");
 
-    png_data.seek(std::io::SeekFrom::Start(0)).expect("Failed to seek in PNG data");
+    png_data
+        .seek(std::io::SeekFrom::Start(0))
+        .expect("Failed to seek in PNG data");
 
     HttpResponse::Ok()
         .content_type("image/png")
@@ -119,12 +132,8 @@ async fn template_default(
 ) -> impl Responder {
     let template_name = template_name.to_string();
     match templates.get(&template_name) {
-        Some(template) => {
-            serve_image_to_client(template.image.clone())
-        }
-        None => {
-            HttpResponse::NotFound().finish()
-        }
+        Some(template) => serve_image_to_client(template.image.clone()),
+        None => HttpResponse::NotFound().finish(),
     }
 }
 
