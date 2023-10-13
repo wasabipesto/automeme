@@ -134,9 +134,8 @@ fn get_template_data(
     }
 }
 
-/// Renders text onto an image for one field. Current work-in-progress.
-fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
-    // Set up layout struct and styling options
+/// Generates a layout struct with options from the settings.
+fn get_field_text_layout(text_field: &TextField) -> Layout {
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
     layout.reset(&LayoutSettings {
         x: text_field.xmin,
@@ -148,6 +147,12 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         wrap_style: WrapStyle::Word,
         ..Default::default()
     });
+    layout
+}
+
+/// Renders text onto an image for one field. Current work-in-progress.
+fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
+    let mut layout = get_field_text_layout(text_field);
 
     // Set color and fill threshold
     let pixel = Rgb(text_field.color);
@@ -164,12 +169,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     layout.append(&[font], &TextStyle::new(&text, text_size, 0));
 
     // Shrink text to fit the field if necessary
-    while layout.height()
-        > layout
-            .settings()
-            .max_height
-            .expect("Failed to get layout max_height")
-    {
+    while layout.height() > layout.settings().max_height.expect("No max_height!") {
         text_size -= 1.0;
         layout.clear();
         layout.append(&[font], &TextStyle::new(&text, text_size, 0));
