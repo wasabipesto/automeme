@@ -59,7 +59,7 @@ struct TextField {
 /// Load and deserialize all JSON files in the templates directory.
 fn load_templates() -> HashMap<String, Template> {
     glob("templates/*.json")
-        .unwrap()
+        .expect("Failed to resolve glob pattern")
         .filter_map(|entry| entry.ok())
         .map(|file_path| {
             let json_content =
@@ -121,8 +121,14 @@ fn get_template_data(
     match templates.get(&template_name) {
         Some(template) => Some((
             template.clone(),
-            images.get(&template.image_path).unwrap().clone(),
-            fonts.get(&template.font_path).unwrap().clone(),
+            images
+                .get(&template.image_path)
+                .expect("Failed to get cached image")
+                .clone(),
+            fonts
+                .get(&template.font_path)
+                .expect("Failed to get cached font")
+                .clone(),
         )),
         None => None,
     }
@@ -158,7 +164,12 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     layout.append(&[font], &TextStyle::new(&text, text_size, 0));
 
     // Shrink text to fit the field if necessary
-    while layout.height() > layout.settings().max_height.unwrap() {
+    while layout.height()
+        > layout
+            .settings()
+            .max_height
+            .expect("Failed to get layout max_height")
+    {
         text_size -= 1.0;
         layout.clear();
         layout.append(&[font], &TextStyle::new(&text, text_size, 0));
