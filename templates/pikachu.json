@@ -4,11 +4,11 @@
     "font_path": "fonts/Anton-Regular.ttf",
     "text_fields": [
         {
-            "text": "me: forgets to add transparency to my text renderer",
-            "xmin": 0,
-            "ymin": 0,
-            "width": 1354,
-            "height": 250,
+            "text": "mfw program loads data at runtime, crashes",
+            "xmin": 50,
+            "ymin": 50,
+            "width": 1254,
+            "height": 200,
             "max_size": 60,
             "uppercase": true,
             "color": "idk"

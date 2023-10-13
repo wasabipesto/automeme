@@ -120,17 +120,26 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         ..Default::default()
     });
 
-    // Set color and threshold
+    // Set color and fill threshold
     let pixel = Rgb([255, 255, 255]);
     let mask_cutoff = u8::MAX;
 
+    // Optionally convert to uppercase
     let text = match text_field.uppercase {
         false => text_field.text.clone(),
         true => text_field.text.to_uppercase(),
     };
 
     // Add text to layout
-    layout.append(&[font], &TextStyle::new(&text, text_field.max_size, 0));
+    let mut text_size = text_field.max_size;
+    layout.append(&[font], &TextStyle::new(&text, text_size, 0));
+
+    // Shrink text to fit the field if necessary
+    while layout.height() > layout.settings().max_height.unwrap() {
+        text_size -= 1.0;
+        layout.clear();
+        layout.append(&[font], &TextStyle::new(&text, text_size, 0));
+    }
 
     // Generate glyph pattern from the lyout
     for glyph in layout.glyphs().iter() {
@@ -140,9 +149,10 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         // Print pixels to the image canvas
         for x in 0..metrics.width {
             for y in 0..metrics.height {
-                if bytes[x + y * metrics.width] >= mask_cutoff {
-                    let x = x as u32 + glyph.x as u32;
-                    let y = y as u32 + glyph.y as u32;
+                let byte_index = y * glyph.width + x;
+                if bytes[byte_index] >= mask_cutoff {
+                    let x = glyph.x as u32 + x as u32;
+                    let y = glyph.y as u32 + y as u32;
                     image.put_pixel(x, y, pixel);
                 }
             }
