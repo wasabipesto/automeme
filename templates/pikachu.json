@@ -11,7 +11,7 @@
             "height": 200,
             "max_size": 60,
             "uppercase": true,
-            "color": "idk"
+            "color": [255, 255, 255]
         }
     ]
 }

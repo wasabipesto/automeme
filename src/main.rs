@@ -6,7 +6,7 @@ use fontdue::layout::{
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{Rgb, RgbImage};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
@@ -42,8 +42,8 @@ struct TextField {
     max_size: f32,
     /// Whether the text should be forced into uppercase
     uppercase: bool,
-    // Color of the text in RGB
-    //color: ,
+    /// Color of the text in RGB
+    color: [u8; 3],
 }
 
 fn load_templates() -> HashMap<String, Template> {
@@ -121,7 +121,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     });
 
     // Set color and fill threshold
-    let pixel = Rgb([255, 255, 255]);
+    let pixel = Rgb(text_field.color);
     let mask_cutoff = u8::MAX;
 
     // Optionally convert to uppercase
