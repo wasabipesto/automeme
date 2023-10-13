@@ -4,7 +4,7 @@
     "font_path": "fonts/BebasNeue-Regular.ttf",
     "text_fields": [
         {
-            "default_text": "idk",
+            "default_text": "me: forgets to add transparency to my text renderer",
             "color": "idk",
             "max_size": 20,
             "x_left": 0,

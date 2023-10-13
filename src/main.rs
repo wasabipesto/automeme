@@ -92,11 +92,11 @@ fn get_template_data(
     }
 }
 
-fn render_text_simple(font: &Font) -> RgbImage {
+fn add_text_to_image(text: &String, image: &RgbImage, font: &Font) -> RgbImage {
     // Generate blank image canvas
     let width: u32 = 400;
     let height: u32 = 300;
-    let mut image = RgbImage::new(width, height);
+    let mut image = image.clone();
 
     // Set up layout struct and styling options
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
@@ -111,9 +111,7 @@ fn render_text_simple(font: &Font) -> RgbImage {
 
     // Add text to layout
     let fonts_ref = &[font];
-    layout.append(fonts_ref, &TextStyle::new("Text rendering is ", 32.0, 0));
-    layout.append(fonts_ref, &TextStyle::new("fucking ", 48.0, 0));
-    layout.append(fonts_ref, &TextStyle::new("difficult!", 32.0, 0));
+    layout.append(fonts_ref, &TextStyle::new(text, 32.0, 0));
 
     // Generate glyph pattern from the lyout
     let glyphs = layout.glyphs();
@@ -125,10 +123,12 @@ fn render_text_simple(font: &Font) -> RgbImage {
         for x in 0..metrics.width {
             for y in 0..metrics.height {
                 let mask = bytes[x + y * metrics.width];
-                let pixel = Rgb([mask, mask, mask]);
-                let x = x as u32 + glyph.x as u32;
-                let y = y as u32 + glyph.y as u32;
-                image.put_pixel(x, y, pixel);
+                if mask > 0 {
+                    let pixel = Rgb([mask, mask, mask]);
+                    let x = x as u32 + glyph.x as u32;
+                    let y = y as u32 + glyph.y as u32;
+                    image.put_pixel(x, y, pixel);
+                }
             }
         }
     }
@@ -156,12 +156,6 @@ async fn index() -> impl Responder {
     "Hello world!"
 }
 
-#[get("/test")]
-async fn template_test(fonts: web::Data<HashMap<String, Font>>) -> impl Responder {
-    let font_name = "fonts/BebasNeue-Regular.ttf".to_string();
-    serve_image_to_client(render_text_simple(fonts.get(&font_name).unwrap()))
-}
-
 #[get("/{template_name}")]
 async fn template_default(
     template_name: web::Path<String>,
@@ -171,8 +165,11 @@ async fn template_default(
 ) -> impl Responder {
     match get_template_data(template_name, templates, images, fonts) {
         Some((template, template_image, font)) => {
-            let rendered_image = template_image;
-            serve_image_to_client(rendered_image)
+            let mut image = template_image.clone();
+            for text_field in template.text_fields {
+                image = add_text_to_image(&text_field.default_text, &image, &font);
+            }
+            serve_image_to_client(image)
         }
         None => HttpResponse::NotFound().finish(),
     }
@@ -194,7 +191,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(images.clone()))
             .app_data(web::Data::new(fonts.clone()))
             .service(index)
-            .service(template_test)
             .service(template_default)
     })
     .bind("0.0.0.0:8080")?
