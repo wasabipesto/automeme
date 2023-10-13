@@ -1,3 +1,7 @@
+//! Automeme generates memes and serves them over HTTP in a human-friendly way.
+//! URLs are designed to be easily type-able to predictably generate the
+//! desired image, and then fetched by e.g. a chatroom's link preview service.
+
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use fontdue;
 use fontdue::layout::{
@@ -6,7 +10,7 @@ use fontdue::layout::{
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{Rgb, RgbImage};
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
@@ -14,6 +18,10 @@ use std::io::Read;
 use std::io::{Cursor, Seek};
 use std::u8;
 
+const FONT_GEOMETRY_SCALE: f32 = 60.0;
+
+/// Data from the JSON template files. At startup these are loaded in and then the
+/// image and font paths are checked and loaded as well.
 #[derive(Debug, Deserialize, Clone)]
 struct Template {
     /// The name of the template as referenced in urls and lookup keys
@@ -26,13 +34,15 @@ struct Template {
     text_fields: Vec<TextField>,
 }
 
+/// Each text field represents a location where text can be rendered. Text will
+/// be shrunk until it fits in the field specified.
 #[derive(Debug, Deserialize, Clone)]
 struct TextField {
     /// The text that goes in each field
     text: String,
     /// Distance from the left, in pixels, where the text field begins
     xmin: f32,
-    /// Distance from the bottom, in pixels, where the text field begins
+    /// Distance from the top, in pixels, where the text field begins
     ymin: f32,
     /// Width of the field in pixels
     width: f32,
@@ -46,6 +56,7 @@ struct TextField {
     color: [u8; 3],
 }
 
+/// Load and deserialize all JSON files in the templates directory.
 fn load_templates() -> HashMap<String, Template> {
     glob("templates/*.json")
         .unwrap()
@@ -60,6 +71,7 @@ fn load_templates() -> HashMap<String, Template> {
         .collect()
 }
 
+/// Load all images referred to by templates and convert to RGB8.
 fn load_images(templates: &HashMap<String, Template>) -> HashMap<String, RgbImage> {
     templates
         .iter()
@@ -74,6 +86,7 @@ fn load_images(templates: &HashMap<String, Template>) -> HashMap<String, RgbImag
         .collect()
 }
 
+/// Load all fonts referred to by templates and parses them.
 fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
     templates
         .iter()
@@ -82,13 +95,22 @@ fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
             File::open(&template.font_path)
                 .and_then(|mut font_file| font_file.read_to_end(&mut font_bytes))
                 .expect("Failed to read font file");
-            let font_data = Font::from_bytes(font_bytes, FontSettings::default())
-                .expect("Failed to load font data");
+            let font_data = Font::from_bytes(
+                font_bytes,
+                FontSettings {
+                    collection_index: 0,
+                    scale: FONT_GEOMETRY_SCALE,
+                },
+            )
+            .expect("Failed to load font data");
             (template.font_path.clone(), font_data)
         })
         .collect()
 }
 
+/// Given a template name, get all assciated data. Returns None if the template
+/// was not found but panics if the image or font could not be found since they
+/// should have been loaded at startup.
 fn get_template_data(
     template_name: web::Path<String>,
     templates: web::Data<HashMap<String, Template>>,
@@ -106,6 +128,7 @@ fn get_template_data(
     }
 }
 
+/// Renders text onto an image for one field. Current work-in-progress.
 fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
     // Set up layout struct and styling options
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
@@ -162,6 +185,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     image
 }
 
+/// Streams the image data to the client and tells them it's a PNG file.
 fn serve_image_to_client(image: RgbImage) -> HttpResponse {
     let mut png_data = Cursor::new(Vec::new());
     image
@@ -177,11 +201,13 @@ fn serve_image_to_client(image: RgbImage) -> HttpResponse {
         .body(png_data.into_inner())
 }
 
+/// Basic hello world index. TODO: Make more informative.
 #[get("/")]
 async fn index() -> impl Responder {
     "Hello world!"
 }
 
+/// Finds a template by name and renders it with default settings.
 #[get("/{template_name}")]
 async fn template_default(
     template_name: web::Path<String>,
@@ -201,8 +227,10 @@ async fn template_default(
     }
 }
 
+/// Server startup tasks.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // Load in all resources
     println!("Server starting...");
     let templates = load_templates();
     println!("Loaded {} templates.", templates.len());
@@ -211,6 +239,7 @@ async fn main() -> std::io::Result<()> {
     let fonts = load_fonts(&templates);
     println!("Loaded {} fonts.", fonts.len());
 
+    // Start the server
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(templates.clone()))
