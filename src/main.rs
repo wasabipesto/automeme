@@ -1,5 +1,6 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use fontdue;
+use fontdue::layout::{CoordinateSystem, Layout, TextStyle};
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{DynamicImage, Rgb, RgbImage};
@@ -20,7 +21,7 @@ struct TemplateSimple {
 
 #[derive(Debug, Clone)]
 struct Template {
-    image: DynamicImage,
+    image: RgbImage,
     text_fields: Vec<TextField>,
 }
 
@@ -41,11 +42,14 @@ fn load_templates() -> HashMap<String, Template> {
         .expect("Failed to read glob pattern")
         .filter_map(|entry| entry.ok())
         .map(|file_path| {
-            let json_content = std::fs::read_to_string(&file_path).expect("Failed to read file");
+            let json_content =
+                std::fs::read_to_string(&file_path).expect("Failed to read JSON file");
             let template: TemplateSimple =
                 serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
             let image_path = format!("templates/{}", template.image_filename);
-            let image = image::open(image_path).expect("Failed to open image file");
+            let image = image::open(image_path)
+                .expect("Failed to open image file")
+                .to_rgb8();
             (
                 template.template_name.clone(),
                 Template {
@@ -63,9 +67,9 @@ fn load_fonts() -> HashMap<String, Font> {
         .filter_map(|entry| entry.ok())
         .map(|file_path| {
             let font_name = file_path
-                .file_stem()
-                .and_then(|stem| stem.to_str())
-                .expect("Failed to get file stem")
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap()
                 .to_owned();
             let mut font_bytes = Vec::new();
             File::open(&file_path)
@@ -78,7 +82,7 @@ fn load_fonts() -> HashMap<String, Font> {
         .collect()
 }
 
-fn generate_random_noise_image() -> DynamicImage {
+fn generate_random_noise_image() -> RgbImage {
     let mut rng = rand::thread_rng();
 
     let width = 400;
@@ -96,10 +100,39 @@ fn generate_random_noise_image() -> DynamicImage {
         }
     }
 
-    DynamicImage::ImageRgb8(image)
+    image
 }
 
-fn serve_image_to_client(image: DynamicImage) -> HttpResponse {
+fn render_text_simple(font: &Font) -> RgbImage {
+    let width = 400;
+    let height = 300;
+
+    let mut image = RgbImage::new(width, height);
+    let mut layout = Layout::new(CoordinateSystem::PositiveYUp);
+    let fonts_ref = &[font];
+
+    layout.append(fonts_ref, &TextStyle::new("Hello ", 35.0, 0));
+    layout.append(fonts_ref, &TextStyle::new("world!", 40.0, 0));
+    let glyphs = layout.glyphs();
+
+    for glyph in glyphs.iter() {
+        let (metrics, bytes) = font.rasterize_config(glyph.key);
+
+        for x in 0..metrics.width {
+            for y in 0..metrics.height {
+                let mask = bytes[x + y * metrics.width];
+                let pixel = Rgb([mask, mask, mask]);
+                let x = x as u32 + glyph.x as u32;
+                let y = y as u32 + glyph.y as u32;
+                image.put_pixel(x, y, pixel);
+            }
+        }
+    }
+
+    image
+}
+
+fn serve_image_to_client(image: RgbImage) -> HttpResponse {
     let mut png_data = Cursor::new(Vec::new());
     image
         .write_to(&mut png_data, image::ImageOutputFormat::Png)
@@ -120,7 +153,16 @@ async fn index() -> impl Responder {
 }
 
 #[get("/test")]
-async fn template_test() -> impl Responder {
+async fn template_test(fonts: web::Data<HashMap<String, Font>>) -> impl Responder {
+    let font_name = "BebasNeue-Regular.ttf".to_string();
+    match fonts.get(&font_name) {
+        Some(font) => serve_image_to_client(render_text_simple(font)),
+        None => HttpResponse::NotFound().finish(),
+    }
+}
+
+#[get("/random")]
+async fn template_random() -> impl Responder {
     let image = generate_random_noise_image();
     serve_image_to_client(image)
 }
@@ -132,7 +174,10 @@ async fn template_default(
 ) -> impl Responder {
     let template_name = template_name.to_string();
     match templates.get(&template_name) {
-        Some(template) => serve_image_to_client(template.image.clone()),
+        Some(template) => {
+            let template_image = template.image.clone();
+            serve_image_to_client(template_image)
+        }
         None => HttpResponse::NotFound().finish(),
     }
 }
@@ -151,6 +196,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(fonts.clone()))
             .service(index)
             .service(template_test)
+            .service(template_random)
             .service(template_default)
     })
     .bind("0.0.0.0:8080")?
