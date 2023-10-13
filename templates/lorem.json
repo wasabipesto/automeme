@@ -1,0 +1,17 @@
+{
+    "template_name": "lorem",
+    "image_path": "images/pikachu.png",
+    "font_path": "fonts/BebasNeue-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. In fermentum et sollicitudin ac orci phasellus egestas tellus. Scelerisque in dictum non consectetur a erat nam at. Velit scelerisque in dictum non. Aliquam purus sit amet luctus venenatis lectus magna fringilla urna. Feugiat vivamus at augue eget. Consequat nisl vel pretium lectus quam id leo in. Imperdiet nulla malesuada pellentesque elit eget gravida cum sociis natoque. Quis enim lobortis scelerisque fermentum dui faucibus. Consequat mauris nunc congue nisi vitae suscipit tellus. Interdum consectetur libero id faucibus nisl tincidunt eget nullam non. Diam phasellus vestibulum lorem sed risus. Egestas fringilla phasellus faucibus scelerisque eleifend. Quam elementum pulvinar etiam non quam lacus suspendisse. Viverra ipsum nunc aliquet bibendum enim facilisis gravida neque convallis. Nisl nunc mi ipsum faucibus. Lobortis feugiat vivamus at augue eget arcu dictum varius. Molestie nunc non blandit massa enim nec dui. Ipsum consequat nisl vel pretium lectus quam id. Enim blandit volutpat maecenas volutpat blandit aliquam etiam erat velit. Consequat semper viverra nam libero justo laoreet sit. Proin libero nunc consequat interdum varius. Elementum tempus egestas sed sed risus pretium. Pellentesque elit eget gravida cum sociis natoque penatibus et magnis. At lectus urna duis convallis convallis tellus id interdum. Volutpat ac tincidunt vitae semper quis lectus nulla at. Ultrices eros in cursus turpis massa tincidunt dui ut. Quam viverra orci sagittis eu volutpat odio facilisis.  Feugiat vivamus at augue eget. Mattis nunc sed blandit libero volutpat sed cras ornare arcu. Sed lectus vestibulum mattis ullamcorper. Facilisis mauris sit amet massa vitae tortor condimentum. Ut diam quam nulla porttitor. Commodo nulla facilisi nullam vehicula ipsum a arcu cursus. Vitae turpis massa sed elementum tempus egestas sed. Sed id semper risus in. Massa massa ultricies mi quis hendrerit. Metus aliquam eleifend mi in. Fames ac turpis egestas maecenas. Blandit massa enim nec dui nunc mattis enim ut tellus. Congue quisque egestas diam in arcu cursus. Id consectetur purus ut faucibus pulvinar elementum.  Ornare lectus sit amet est. Massa sed elementum tempus egestas sed sed risus pretium quam. Facilisis leo vel fringilla est ullamcorper eget nulla. Quis imperdiet massa tincidunt nunc pulvinar sapien et ligula. Tortor at risus viverra adipiscing at in tellus integer feugiat. Aliquet risus feugiat in ante metus dictum at tempor commodo. Neque egestas congue quisque egestas diam in. Tellus in metus vulputate eu scelerisque felis imperdiet proin. Ipsum dolor sit amet consectetur. Turpis massa sed elementum tempus egestas. Sit amet aliquam id diam maecenas ultricies mi eget. Vitae aliquet nec ullamcorper sit amet. Molestie nunc non blandit massa enim. Scelerisque eu ultrices vitae auctor eu augue. In eu mi bibendum neque. Integer feugiat scelerisque varius morbi enim nunc faucibus. Habitasse platea dictumst quisque sagittis purus sit amet. Feugiat vivamus at augue eget arcu dictum varius.",
+            "xmin": 0,
+            "ymin": 0,
+            "width": 1354,
+            "height": 784,
+            "max_size": 20,
+            "uppercase": false,
+            "color": "idk"
+        }
+    ]
+}

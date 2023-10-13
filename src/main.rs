@@ -12,24 +12,38 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::io::{Cursor, Seek};
+use std::u8;
 
 #[derive(Debug, Deserialize, Clone)]
 struct Template {
+    /// The name of the template as referenced in urls and lookup keys
     template_name: String,
+    /// The relative path of the base image from the project root, also used as a lookup key
     image_path: String,
+    /// The relative path of the font from the project root, also used as a lookup key
     font_path: String,
+    /// All places text can go in an image
     text_fields: Vec<TextField>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 struct TextField {
-    //color: String,
-    //max_size: u32,
-    default_text: String,
-    x_left: f32,
-    y_top: f32,
+    /// The text that goes in each field
+    text: String,
+    /// Distance from the left, in pixels, where the text field begins
+    xmin: f32,
+    /// Distance from the bottom, in pixels, where the text field begins
+    ymin: f32,
+    /// Width of the field in pixels
     width: f32,
+    /// Height of the field in pixels
     height: f32,
+    /// Maximum size of the text in this field
+    max_size: f32,
+    /// Whether the text should be forced into uppercase
+    uppercase: bool,
+    // Color of the text in RGB
+    //color: ,
 }
 
 fn load_templates() -> HashMap<String, Template> {
@@ -92,39 +106,41 @@ fn get_template_data(
     }
 }
 
-fn add_text_to_image(text: &String, image: &RgbImage, font: &Font) -> RgbImage {
-    // Generate blank image canvas
-    let width: u32 = 400;
-    let height: u32 = 300;
-    let mut image = image.clone();
-
+fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
     // Set up layout struct and styling options
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
     layout.reset(&LayoutSettings {
-        max_height: Some(height as f32),
-        max_width: Some(width as f32),
+        x: text_field.xmin,
+        y: text_field.ymin,
+        max_height: Some(text_field.height),
+        max_width: Some(text_field.width),
         horizontal_align: HorizontalAlign::Center,
         vertical_align: VerticalAlign::Middle,
         wrap_style: WrapStyle::Word,
         ..Default::default()
     });
 
+    // Set color and threshold
+    let pixel = Rgb([255, 255, 255]);
+    let mask_cutoff = u8::MAX;
+
+    let text = match text_field.uppercase {
+        false => text_field.text.clone(),
+        true => text_field.text.to_uppercase(),
+    };
+
     // Add text to layout
-    let fonts_ref = &[font];
-    layout.append(fonts_ref, &TextStyle::new(text, 32.0, 0));
+    layout.append(&[font], &TextStyle::new(&text, text_field.max_size, 0));
 
     // Generate glyph pattern from the lyout
-    let glyphs = layout.glyphs();
-    for glyph in glyphs.iter() {
+    for glyph in layout.glyphs().iter() {
         // Generate pixel layout for each glyph
         let (metrics, bytes) = font.rasterize_config(glyph.key);
 
         // Print pixels to the image canvas
         for x in 0..metrics.width {
             for y in 0..metrics.height {
-                let mask = bytes[x + y * metrics.width];
-                if mask > 0 {
-                    let pixel = Rgb([mask, mask, mask]);
+                if bytes[x + y * metrics.width] >= mask_cutoff {
                     let x = x as u32 + glyph.x as u32;
                     let y = y as u32 + glyph.y as u32;
                     image.put_pixel(x, y, pixel);
@@ -167,7 +183,7 @@ async fn template_default(
         Some((template, template_image, font)) => {
             let mut image = template_image.clone();
             for text_field in template.text_fields {
-                image = add_text_to_image(&text_field.default_text, &image, &font);
+                image = add_text_to_image(&text_field, image, &font);
             }
             serve_image_to_client(image)
         }
