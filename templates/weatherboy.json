@@ -1,0 +1,17 @@
+{
+    "template_name": "weatherboy",
+    "image_path": "images/weatherboy.png",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "Wouldn't you like to know, weather boy?",
+            "xmin": 50,
+            "ymin": 800,
+            "width": 1820,
+            "height": 160,
+            "max_size": 80,
+            "uppercase": false,
+            "color": [240, 240, 120]
+        }
+    ]
+}

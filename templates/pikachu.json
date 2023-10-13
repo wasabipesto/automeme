@@ -5,11 +5,11 @@
     "text_fields": [
         {
             "text": "mfw program loads data at runtime, crashes",
-            "xmin": 50,
-            "ymin": 50,
-            "width": 1254,
-            "height": 200,
-            "max_size": 60,
+            "xmin": 10,
+            "ymin": 10,
+            "width": 480,
+            "height": 100,
+            "max_size": 30,
             "uppercase": true,
             "color": [255, 255, 255]
         }

@@ -112,7 +112,7 @@ fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
 /// was not found but panics if the image or font could not be found since they
 /// should have been loaded at startup.
 fn get_template_data(
-    template_name: web::Path<String>,
+    template_name: String,
     templates: web::Data<HashMap<String, Template>>,
     images: web::Data<HashMap<String, RgbImage>>,
     fonts: web::Data<HashMap<String, Font>>,
@@ -134,6 +134,31 @@ fn get_template_data(
     }
 }
 
+/// Cleans a path and turns it into usable text, divided on delimiters.
+fn get_text_vec_from_path(full_text: String) -> Vec<String> {
+    full_text
+        .replace("-", " ")
+        .replace("_", " ")
+        .split('|')
+        .map(|s| s.trim().to_string())
+        .collect()
+}
+
+/// Replaces text in each field with the text in the override vec. Extra strings
+/// are ignored.
+fn override_text_fields(
+    mut text_fields: Vec<TextField>,
+    override_strings: Vec<String>,
+) -> Vec<TextField> {
+    for (index, override_str) in override_strings.into_iter().enumerate() {
+        if let Some(text_field) = text_fields.get_mut(index) {
+            text_field.text = override_str;
+        }
+    }
+
+    text_fields
+}
+
 /// Generates a layout struct with options from the settings.
 fn get_field_text_layout(text_field: &TextField) -> Layout {
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
@@ -150,7 +175,7 @@ fn get_field_text_layout(text_field: &TextField) -> Layout {
     layout
 }
 
-/// Renders text onto an image for one field. Current work-in-progress.
+/// Renders text onto an image for one field.
 fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
     let mut layout = get_field_text_layout(text_field);
 
@@ -214,22 +239,46 @@ fn serve_image_to_client(image: RgbImage) -> HttpResponse {
 
 /// Basic hello world index. TODO: Make more informative.
 #[get("/")]
-async fn index() -> impl Responder {
+async fn template_index() -> impl Responder {
     "Hello world!"
 }
 
 /// Finds a template by name and renders it with default settings.
 #[get("/{template_name}")]
 async fn template_default(
-    template_name: web::Path<String>,
+    path: web::Path<String>,
     templates: web::Data<HashMap<String, Template>>,
     images: web::Data<HashMap<String, RgbImage>>,
     fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
+    let template_name = path.into_inner();
     match get_template_data(template_name, templates, images, fonts) {
         Some((template, template_image, font)) => {
             let mut image = template_image.clone();
             for text_field in template.text_fields {
+                image = add_text_to_image(&text_field, image, &font);
+            }
+            serve_image_to_client(image)
+        }
+        None => HttpResponse::NotFound().finish(),
+    }
+}
+
+/// Renders a template with entirely user-given text.
+#[get("/{template_name}/f/{full_text}")]
+async fn template_full_text(
+    path: web::Path<(String, String)>,
+    templates: web::Data<HashMap<String, Template>>,
+    images: web::Data<HashMap<String, RgbImage>>,
+    fonts: web::Data<HashMap<String, Font>>,
+) -> impl Responder {
+    let (template_name, full_text) = path.into_inner();
+    match get_template_data(template_name, templates, images, fonts) {
+        Some((template, template_image, font)) => {
+            let mut image = template_image.clone();
+            let override_strings = get_text_vec_from_path(full_text);
+            let text_fields = override_text_fields(template.text_fields, override_strings);
+            for text_field in text_fields {
                 image = add_text_to_image(&text_field, image, &font);
             }
             serve_image_to_client(image)
@@ -256,8 +305,9 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(templates.clone()))
             .app_data(web::Data::new(images.clone()))
             .app_data(web::Data::new(fonts.clone()))
-            .service(index)
+            .service(template_index)
             .service(template_default)
+            .service(template_full_text)
     })
     .bind("0.0.0.0:8080")?
     .run()
