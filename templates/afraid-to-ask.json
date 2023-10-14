@@ -1,0 +1,27 @@
+{
+    "template_name": "afraid-to-ask",
+    "image_path": "images/afraid-to-ask.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "I don't know who al gore is",
+            "xmin": 25,
+            "ymin": 25,
+            "width": 610,
+            "height": 150,
+            "max_size": 80,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        },
+        {
+            "text": "and at this point I'm too afraid to ask",
+            "xmin": 25,
+            "ymin": 472,
+            "width": 610,
+            "height": 150,
+            "max_size": 80,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        }
+    ]
+}

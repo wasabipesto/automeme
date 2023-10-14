@@ -79,12 +79,11 @@ fn load_images(templates: &HashMap<String, Template>) -> HashMap<String, RgbImag
     templates
         .iter()
         .map(|(_, template)| {
-            (
-                template.image_path.clone(),
-                image::open(&template.image_path)
-                    .expect("Failed to open image file")
-                    .to_rgb8(),
-            )
+            let file = image::open(&template.image_path);
+            match file {
+                Ok(image) => (template.image_path.clone(), image.to_rgb8()),
+                Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
+            }
         })
         .collect()
 }
@@ -95,9 +94,12 @@ fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
         .iter()
         .map(|(_, template)| {
             let mut font_bytes = Vec::new();
-            File::open(&template.font_path)
-                .and_then(|mut font_file| font_file.read_to_end(&mut font_bytes))
-                .expect("Failed to read font file");
+            let file = File::open(&template.font_path)
+                .and_then(|mut font_file| font_file.read_to_end(&mut font_bytes));
+            match file {
+                Ok(_) => (),
+                Err(e) => panic!("Could not open file {} {}", &template.font_path, e),
+            }
             let font_data = Font::from_bytes(
                 font_bytes,
                 FontSettings {
