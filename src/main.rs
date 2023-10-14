@@ -2,7 +2,11 @@
 //! URLs are designed to be easily type-able to predictably generate the
 //! desired image, and then fetched by e.g. a chatroom's link preview service.
 
+#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
+
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use core::u8;
 use fontdue::layout::{
     CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle,
 };
@@ -13,8 +17,7 @@ use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{Cursor, Read, Seek};
-use std::u8;
+use std::io::{Cursor, Read, Result, Seek, SeekFrom};
 
 const FONT_GEOMETRY_SCALE: f32 = 60.0;
 
@@ -60,7 +63,7 @@ struct TextField {
 fn load_templates() -> HashMap<String, Template> {
     glob("templates/*.json")
         .expect("Failed to resolve glob pattern")
-        .filter_map(|entry| entry.ok())
+        .filter_map(std::result::Result::ok)
         .map(|file_path| {
             let json_content =
                 std::fs::read_to_string(file_path).expect("Failed to read JSON file");
@@ -265,7 +268,7 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
         .expect("Failed to write PNG data");
 
     png_data
-        .seek(std::io::SeekFrom::Start(0))
+        .seek(SeekFrom::Start(0))
         .expect("Failed to seek in PNG data");
 
     HttpResponse::Ok()
@@ -353,7 +356,7 @@ async fn template_sed(
 
 /// Server startup tasks.
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<()> {
     // Load in all resources
     println!("Server starting...");
     let templates = load_templates();
