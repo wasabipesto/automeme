@@ -138,20 +138,20 @@ fn get_template_resources(
 /// was not found. Returns a random template if "random" is used.
 fn get_template_data(
     template_name: String,
-    templates: web::Data<HashMap<String, Template>>,
-    images: web::Data<HashMap<String, RgbImage>>,
-    fonts: web::Data<HashMap<String, Font>>,
+    templates: &web::Data<HashMap<String, Template>>,
+    images: &web::Data<HashMap<String, RgbImage>>,
+    fonts: &web::Data<HashMap<String, Font>>,
 ) -> Option<(Template, RgbImage, Font)> {
     // Special case - random
     if template_name == "random" {
         let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
-        return Some(get_template_resources(template, &images, &fonts));
+        return Some(get_template_resources(template, images, fonts));
     }
 
     // Find matching template
     templates
         .get(&template_name)
-        .map(|template| get_template_resources(template, &images, &fonts))
+        .map(|template| get_template_resources(template, images, fonts))
 }
 
 /// Cleans a path and turns it into usable text.
@@ -291,7 +291,7 @@ async fn template_default(
     fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
     let template_name = path.into_inner();
-    match get_template_data(template_name, templates, images, fonts) {
+    match get_template_data(template_name, &templates, &images, &fonts) {
         Some((template, template_image, font)) => {
             let mut image = template_image.clone();
             for text_field in template.text_fields {
@@ -312,7 +312,7 @@ async fn template_fulltext(
     fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
-    match get_template_data(template_name, templates, images, fonts) {
+    match get_template_data(template_name, &templates, &images, &fonts) {
         Some((template, template_image, font)) => {
             let mut image = template_image.clone();
             let text_fields = override_text_fields(
@@ -337,7 +337,7 @@ async fn template_sed(
     fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
-    match get_template_data(template_name, templates, images, fonts) {
+    match get_template_data(template_name, &templates, &images, &fonts) {
         Some((template, template_image, font)) => {
             let mut image = template_image.clone();
             let text_fields = regex_text_fields(
