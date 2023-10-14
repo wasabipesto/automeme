@@ -10,6 +10,7 @@ use fontdue::layout::{
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{Rgb, RgbImage};
+use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use serde_json;
 use std::collections::HashMap;
@@ -108,28 +109,44 @@ fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
         .collect()
 }
 
-/// Given a template name, get all assciated data. Returns None if the template
-/// was not found but panics if the image or font could not be found since they
+/// Given a Template, return a tuple of that Template plus the associated image
+/// and font data. Panics if the image or font could not be found since they
 /// should have been loaded at startup.
+fn get_template_resources(
+    template: &Template,
+    images: &web::Data<HashMap<String, RgbImage>>,
+    fonts: &web::Data<HashMap<String, Font>>,
+) -> (Template, RgbImage, Font) {
+    (
+        template.clone(),
+        images
+            .get(&template.image_path)
+            .expect("Failed to get cached image")
+            .clone(),
+        fonts
+            .get(&template.font_path)
+            .expect("Failed to get cached font")
+            .clone(),
+    )
+}
+
+/// Given a template name, get all assciated data. Returns None if the template
+/// was not found. Returns a random template if "random" is used.
 fn get_template_data(
     template_name: String,
     templates: web::Data<HashMap<String, Template>>,
     images: web::Data<HashMap<String, RgbImage>>,
     fonts: web::Data<HashMap<String, Font>>,
 ) -> Option<(Template, RgbImage, Font)> {
-    let template_name = template_name.to_string();
+    // Special case - random
+    if template_name == "random" {
+        let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
+        return Some(get_template_resources(&template, &images, &fonts));
+    }
+
+    // Find matching template
     match templates.get(&template_name) {
-        Some(template) => Some((
-            template.clone(),
-            images
-                .get(&template.image_path)
-                .expect("Failed to get cached image")
-                .clone(),
-            fonts
-                .get(&template.font_path)
-                .expect("Failed to get cached font")
-                .clone(),
-        )),
+        Some(template) => Some(get_template_resources(&template, &images, &fonts)),
         None => None,
     }
 }
