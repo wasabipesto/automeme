@@ -1,0 +1,17 @@
+{
+    "template_name": "biggus",
+    "image_path": "images/biggus.png",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "xmin": 25,
+            "ymin": 25,
+            "width": 1150,
+            "height": 150,
+            "max_size": 50,
+            "uppercase": false,
+            "color": [255, 255, 255]
+        }
+    ]
+}

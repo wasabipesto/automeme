@@ -16,18 +16,20 @@ Generates a template with default settings.
 
 Replaces all text in the template with the given text. Use `|` to move to the next section.
 
-### Sed (Regex)
+### Sed
 
 `/{template_name}/s/{old_text}/{new_text}`
 
-Replaces text in the template with the given regular expression.
+Replaces text in the template with the given regular expression. No pattern matching, just basic replacement.
 
 ## Sources
 
 ### Images
 
+- `biggus.png`: [Know Your Meme](https://knowyourmeme.com/memes/biggus-dickus), converted to PNG
 - `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), converted to PNG
-- `weatherboy.png`: [This Youtube video](https://youtu.be/py44k46RR_0)
+- `spiderman-crew.png`: [Meming Wiki](https://en.meming.world/wiki/Me_and_the_Boys), converted to PNG
+- `weatherboy.png`: [This Youtube video](https://youtu.be/py44k46RR_0), scaled up 2x
 
 ### Fonts
 
