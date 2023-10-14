@@ -16,17 +16,11 @@ Generates a template with default settings.
 
 Replaces all text in the template with the given text. Use `|` to move to the next section.
 
-### Sed (unimplemented)
+### Sed (Regex)
 
 `/{template_name}/s/{old_text}/{new_text}`
 
 Replaces text in the template with the given regular expression.
-
-### Twitter (unimplemented)
-
-`/{template_name}/t/{top_text}`
-
-Adds text above the image, adding whitespace as necessary. Use `|` to move to a new line.
 
 ## Sources
 

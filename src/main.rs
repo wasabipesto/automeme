@@ -134,14 +134,14 @@ fn get_template_data(
     }
 }
 
-/// Cleans a path and turns it into usable text, divided on delimiters.
-fn get_text_vec_from_path(full_text: String) -> Vec<String> {
-    full_text
-        .replace("-", " ")
-        .replace("_", " ")
-        .split('|')
-        .map(|s| s.trim().to_string())
-        .collect()
+/// Cleans a path and turns it into usable text.
+fn path_to_clean_text(text: String) -> String {
+    text.replace("-", " ").replace("_", " ")
+}
+
+/// Divides a text based on delimiters.
+fn clean_text_to_vec(text: String) -> Vec<String> {
+    text.split('|').map(|s| s.trim().to_string()).collect()
 }
 
 /// Replaces text in each field with the text in the override vec. Extra strings
@@ -157,6 +157,21 @@ fn override_text_fields(
     }
 
     text_fields
+}
+
+/// Replaces text in each field with the pattern.
+fn regex_text_fields(
+    text_fields: Vec<TextField>,
+    old_text: String,
+    new_text: String,
+) -> Vec<TextField> {
+    text_fields
+        .into_iter()
+        .map(|field| TextField {
+            text: field.text.replace(&old_text, &new_text),
+            ..field
+        })
+        .collect()
 }
 
 /// Generates a layout struct with options from the settings.
@@ -266,7 +281,7 @@ async fn template_default(
 
 /// Renders a template with entirely user-given text.
 #[get("/{template_name}/f/{full_text}")]
-async fn template_full_text(
+async fn template_fulltext(
     path: web::Path<(String, String)>,
     templates: web::Data<HashMap<String, Template>>,
     images: web::Data<HashMap<String, RgbImage>>,
@@ -276,8 +291,36 @@ async fn template_full_text(
     match get_template_data(template_name, templates, images, fonts) {
         Some((template, template_image, font)) => {
             let mut image = template_image.clone();
-            let override_strings = get_text_vec_from_path(full_text);
-            let text_fields = override_text_fields(template.text_fields, override_strings);
+            let text_fields = override_text_fields(
+                template.text_fields,
+                clean_text_to_vec(path_to_clean_text(full_text)),
+            );
+            for text_field in text_fields {
+                image = add_text_to_image(&text_field, image, &font);
+            }
+            serve_image_to_client(image)
+        }
+        None => HttpResponse::NotFound().finish(),
+    }
+}
+
+/// Renders a template with entirely user-given text.
+#[get("/{template_name}/s/{old_text}/{new_text}")]
+async fn template_sed(
+    path: web::Path<(String, String, String)>,
+    templates: web::Data<HashMap<String, Template>>,
+    images: web::Data<HashMap<String, RgbImage>>,
+    fonts: web::Data<HashMap<String, Font>>,
+) -> impl Responder {
+    let (template_name, old_text, new_text) = path.into_inner();
+    match get_template_data(template_name, templates, images, fonts) {
+        Some((template, template_image, font)) => {
+            let mut image = template_image.clone();
+            let text_fields = regex_text_fields(
+                template.text_fields,
+                path_to_clean_text(old_text),
+                path_to_clean_text(new_text),
+            );
             for text_field in text_fields {
                 image = add_text_to_image(&text_field, image, &font);
             }
@@ -307,7 +350,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(fonts.clone()))
             .service(template_index)
             .service(template_default)
-            .service(template_full_text)
+            .service(template_fulltext)
+            .service(template_sed)
     })
     .bind("0.0.0.0:8080")?
     .run()
