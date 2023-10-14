@@ -3,7 +3,6 @@
 //! desired image, and then fetched by e.g. a chatroom's link preview service.
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use fontdue;
 use fontdue::layout::{
     CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle,
 };
@@ -12,11 +11,9 @@ use glob::glob;
 use image::{Rgb, RgbImage};
 use rand::seq::IteratorRandom;
 use serde::Deserialize;
-use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Read;
-use std::io::{Cursor, Seek};
+use std::io::{Cursor, Read, Seek};
 use std::u8;
 
 const FONT_GEOMETRY_SCALE: f32 = 60.0;
@@ -66,7 +63,7 @@ fn load_templates() -> HashMap<String, Template> {
         .filter_map(|entry| entry.ok())
         .map(|file_path| {
             let json_content =
-                std::fs::read_to_string(&file_path).expect("Failed to read JSON file");
+                std::fs::read_to_string(file_path).expect("Failed to read JSON file");
             let template: Template =
                 serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
             (template.template_name.clone(), template)
@@ -145,19 +142,18 @@ fn get_template_data(
     // Special case - random
     if template_name == "random" {
         let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
-        return Some(get_template_resources(&template, &images, &fonts));
+        return Some(get_template_resources(template, &images, &fonts));
     }
 
     // Find matching template
-    match templates.get(&template_name) {
-        Some(template) => Some(get_template_resources(&template, &images, &fonts)),
-        None => None,
-    }
+    templates
+        .get(&template_name)
+        .map(|template| get_template_resources(template, &images, &fonts))
 }
 
 /// Cleans a path and turns it into usable text.
 fn path_to_clean_text(text: String) -> String {
-    text.replace("-", " ").replace("_", " ")
+    text.replace(['-', '_'], " ")
 }
 
 /// Divides a text based on delimiters.
@@ -220,9 +216,10 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     let pixel_border: Rgb<u8> = Rgb([0, 0, 0]);
 
     // Optionally convert to uppercase
-    let text = match text_field.uppercase {
-        false => text_field.text.clone(),
-        true => text_field.text.to_uppercase(),
+    let text = if text_field.uppercase {
+        text_field.text.to_uppercase()
+    } else {
+        text_field.text.clone()
     };
 
     // Add text to layout
@@ -237,7 +234,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     }
 
     // Generate glyph pattern from the lyout
-    for glyph in layout.glyphs().iter() {
+    for glyph in layout.glyphs() {
         // Generate pixel layout for each glyph
         let (metrics, bytes) = font.rasterize_config(glyph.key);
 
@@ -247,10 +244,11 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
                 let byte_index = y * glyph.width + x;
                 let x = glyph.x as u32 + x as u32;
                 let y = glyph.y as u32 + y as u32;
-                match bytes[byte_index] {
-                    255 => image.put_pixel(x, y, pixel_interior),
-                    0 => (),
-                    _ => image.put_pixel(x, y, pixel_border), // very hacky border fix
+                match bytes.get(byte_index) {
+                    Some(255) => image.put_pixel(x, y, pixel_interior),
+                    Some(0) => (),
+                    Some(_) => image.put_pixel(x, y, pixel_border), // very hacky border fix
+                    None => panic!("Failed to get byte index"),
                 }
             }
         }
@@ -260,7 +258,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
 }
 
 /// Streams the image data to the client and tells them it's a PNG file.
-fn serve_image_to_client(image: RgbImage) -> HttpResponse {
+fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
     let mut png_data = Cursor::new(Vec::new());
     image
         .write_to(&mut png_data, image::ImageOutputFormat::Png)
@@ -296,7 +294,7 @@ async fn template_default(
             for text_field in template.text_fields {
                 image = add_text_to_image(&text_field, image, &font);
             }
-            serve_image_to_client(image)
+            serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
     }
@@ -321,7 +319,7 @@ async fn template_fulltext(
             for text_field in text_fields {
                 image = add_text_to_image(&text_field, image, &font);
             }
-            serve_image_to_client(image)
+            serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
     }
@@ -347,7 +345,7 @@ async fn template_sed(
             for text_field in text_fields {
                 image = add_text_to_image(&text_field, image, &font);
             }
-            serve_image_to_client(image)
+            serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
     }
