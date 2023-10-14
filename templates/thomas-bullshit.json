@@ -1,0 +1,17 @@
+{
+    "template_name": "thomas-bullshit",
+    "image_path": "images/thomas-bullshit.png",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "Thomas had never seen such bullshit before",
+            "xmin": 25,
+            "ymin": 870,
+            "width": 1390,
+            "height": 160,
+            "max_size": 80,
+            "uppercase": false,
+            "color": [240, 240, 120]
+        }
+    ]
+}

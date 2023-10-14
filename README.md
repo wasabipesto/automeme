@@ -26,10 +26,12 @@ Replaces text in the template with the given regular expression. No pattern matc
 
 ### Images
 
-- `biggus.png`: [Know Your Meme](https://knowyourmeme.com/memes/biggus-dickus), converted to PNG
-- `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), converted to PNG
-- `spiderman-crew.png`: [Meming Wiki](https://en.meming.world/wiki/Me_and_the_Boys), converted to PNG
-- `weatherboy.png`: [This Youtube video](https://youtu.be/py44k46RR_0), scaled up 2x
+- `biggus.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/biggus-dickus)
+- `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), scaled up 2x
+- `spiderman-crew.jpg`: [Meming Wiki](https://en.meming.world/wiki/Me_and_the_Boys)
+- `thomas-bullshit.png`: [Know Your Meme](https://knowyourmeme.com/memes/thomas-had-never-seen-such-bullshit-before)
+- `train-bus.jpg`: [Meming Wiki](https://en.meming.world/wiki/Train_Hitting_School_Bus)
+- `weatherboy.png`: [This Youtube video](https://youtu.be/py44k46RR_0)
 
 ### Fonts
 

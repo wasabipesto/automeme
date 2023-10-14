@@ -55,6 +55,8 @@ struct TextField {
     uppercase: bool,
     /// Color of the text in RGB
     color: [u8; 3],
+    // Color of the text border in RGB
+    //border_color: [u8; 3],
 }
 
 /// Load and deserialize all JSON files in the templates directory.
@@ -211,9 +213,9 @@ fn get_field_text_layout(text_field: &TextField) -> Layout {
 fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
     let mut layout = get_field_text_layout(text_field);
 
-    // Set color and fill threshold
-    let pixel = Rgb(text_field.color);
-    let mask_cutoff = u8::MAX;
+    // Set interior & border color
+    let pixel_interior: Rgb<u8> = Rgb(text_field.color);
+    let pixel_border: Rgb<u8> = Rgb([0, 0, 0]);
 
     // Optionally convert to uppercase
     let text = match text_field.uppercase {
@@ -241,10 +243,12 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         for x in 0..metrics.width {
             for y in 0..metrics.height {
                 let byte_index = y * glyph.width + x;
-                if bytes[byte_index] >= mask_cutoff {
-                    let x = glyph.x as u32 + x as u32;
-                    let y = glyph.y as u32 + y as u32;
-                    image.put_pixel(x, y, pixel);
+                let x = glyph.x as u32 + x as u32;
+                let y = glyph.y as u32 + y as u32;
+                match bytes[byte_index] {
+                    255 => image.put_pixel(x, y, pixel_interior),
+                    0 => (),
+                    _ => image.put_pixel(x, y, pixel_border), // very hacky border fix
                 }
             }
         }
