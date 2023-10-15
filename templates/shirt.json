@@ -1,0 +1,17 @@
+{
+    "template_name": "lorem",
+    "image_path": "images/shirt.png",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "xmin": 160,
+            "ymin": 160,
+            "width": 240,
+            "height": 400,
+            "max_size": 35,
+            "uppercase": false,
+            "color": [0, 0, 0]
+        }
+    ]
+}
