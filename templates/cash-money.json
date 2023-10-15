@@ -1,0 +1,17 @@
+{
+    "template_name": "cash-money",
+    "image_path": "images/cash-money.png",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "that wasn't very cash money of you",
+            "xmin": 25,
+            "ymin": 855,
+            "width": 1390,
+            "height": 200,
+            "max_size": 80,
+            "uppercase": false,
+            "color": [255, 255, 255]
+        }
+    ]
+}

@@ -70,6 +70,7 @@ docker run -d \
 
 - `afraid-to-ask.jpg`: [Meming Wiki](https://en.meming.world/wiki/Afraid_To_Ask_Andy)
 - `biggus.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/biggus-dickus)
+- `cash-money.png`: Frame pulled directly from [this reddit video](https://old.reddit.com/r/GODZILLA/comments/kn4tbt/that_wasnt_very_cash_money_of_you_godzilla/)
 - `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), scaled up 2x
 - `spiderman-crew.jpg`: [Meming Wiki](https://en.meming.world/wiki/Me_and_the_Boys)
 - `through-god.png`: Frame pulled directly from video file
