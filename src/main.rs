@@ -60,6 +60,23 @@ struct TextField {
     //border_color: [u8; 3],
 }
 
+/// Load all resources necessary for server startup.
+fn load_all_resources() -> (
+    HashMap<String, Template>,
+    HashMap<String, RgbImage>,
+    HashMap<String, Font>,
+) {
+    // Load in all resources
+    println!("Server starting...");
+    let templates = load_templates();
+    println!("Loaded {} templates.", templates.len());
+    let images = load_images(&templates);
+    println!("Loaded {} images.", images.len());
+    let fonts = load_fonts(&templates);
+    println!("Loaded {} fonts.", fonts.len());
+    (templates, images, fonts)
+}
+
 /// Load and deserialize all JSON files in the templates directory.
 fn load_templates() -> HashMap<String, Template> {
     glob("templates/*.json")
@@ -358,16 +375,8 @@ async fn template_sed(
 /// Server startup tasks.
 #[actix_web::main]
 async fn main() -> Result<()> {
-    // Load in all resources
-    println!("Server starting...");
-    let templates = load_templates();
-    println!("Loaded {} templates.", templates.len());
-    let images = load_images(&templates);
-    println!("Loaded {} images.", images.len());
-    let fonts = load_fonts(&templates);
-    println!("Loaded {} fonts.", fonts.len());
-
     // Start the server
+    let (templates, images, fonts) = load_all_resources();
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(templates.clone()))
@@ -381,4 +390,33 @@ async fn main() -> Result<()> {
     .bind("0.0.0.0:8888")?
     .run()
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use actix_web::{http::header::ContentType, test, App};
+
+    use super::*;
+
+    #[actix_web::test]
+    async fn test_template_default_pikachu() {
+        let (templates, images, fonts) = load_all_resources();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .app_data(web::Data::new(images.clone()))
+                .app_data(web::Data::new(fonts.clone()))
+                .service(template_index)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_sed),
+        )
+        .await;
+        let req = test::TestRequest::default()
+            .uri("/pikachu")
+            .insert_header(ContentType::plaintext())
+            .to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+    }
 }
