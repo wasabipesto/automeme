@@ -14,6 +14,7 @@ use fontdue::layout::{
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{Rgb, RgbImage};
+use maud::{html, Markup};
 use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -296,8 +297,38 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
 
 /// Basic hello world index. TODO: Make more informative.
 #[get("/")]
-async fn template_index() -> impl Responder {
-    "Hello world!"
+async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
+    Ok(html! {
+        html {
+            head {
+                title { "😂 automeme" }
+            }
+            body style="margin:20px;" {
+                h1 { "😂 automeme" }
+                p { 
+                    "Automeme generates memes and serves them over HTTP in a human-friendly way. URLs are designed to be easily type-able to predictably generate the desired image, and then fetched by e.g. a chatroom's link preview service." 
+                }
+                p {
+                    "To get an image with the default text, simply fetch the image by template name from /{template-name}. For instance, you can get the surprised pikachu meme from " a href="pikachu" { "/pikachu" } " or the \"Wouldn't you like to know, weatherboy?\" meme from " a href="weatherboy" { "/weatherboy" } "."
+                }
+                p {
+                    "If you want to edit the text of a meme, or add text to a meme with no default text, you can use the " strong { "/f" } " or " strong { "/s" } " options. The " strong { "/f " } " option allows you to overwrite the text of a meme to your own, like adding \"mfw code doesn't compile\" to the surprised pikachu template. To do this, take the default image path like " a href="pikachu" { "/pikachu" } " and add /f/{your-text} to make " a href="pikachu/f/mfw-code-doesn't-compile" { "/pikachu/f/mfw-code-doesn't-compile" } ". The " strong { "/s" } " option replaces existing text in the template to your own with the pattern /s/{old-text}/{new-text}, allowing you to quickly turn \"Wouldn't you like to know, weatherboy?\" into " a href="weatherboy/s/weather-boy/type-checker" { "\"Wouldn't you like to know, type checker?\"" } " For memes with multiple fields, use | to move to the next field. Spaces are substituted from both - and _."
+                }
+                @for template in templates.values() {
+                    a href=(template.template_name) {
+                        img 
+                            src=(template.template_name)
+                            title=(template.template_name)
+                            style="max-height:250px; max-width:300px; margin:20px;"
+                            {}
+                    }
+                }
+                p { 
+                    "You can find the source for this project at " a href="https://github.com/wasabipesto/automeme" { "https://github.com/wasabipesto/automeme" } "."
+                }
+            }
+        }
+    })
 }
 
 /// Finds a template by name and renders it with default settings.
@@ -394,12 +425,11 @@ async fn main() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use actix_web::{http::header::ContentType, test, App};
-
     use super::*;
+    use actix_web::test;
 
     #[actix_web::test]
-    async fn test_template_default_pikachu() {
+    async fn test_template_index() {
         let (templates, images, fonts) = load_all_resources();
         let app = test::init_service(
             App::new()
@@ -413,8 +443,7 @@ mod tests {
         )
         .await;
         let req = test::TestRequest::default()
-            .uri("/pikachu")
-            .insert_header(ContentType::plaintext())
+            .uri("/")
             .to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
