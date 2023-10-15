@@ -295,7 +295,7 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
         .body(png_data.into_inner())
 }
 
-/// Basic hello world index. TODO: Make more informative.
+/// Index of all templates with a little help text.
 #[get("/")]
 async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
     Ok(html! {
@@ -305,8 +305,8 @@ async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Resu
             }
             body style="margin:20px;" {
                 h1 { "😂 automeme" }
-                p { 
-                    "Automeme generates memes and serves them over HTTP in a human-friendly way. URLs are designed to be easily type-able to predictably generate the desired image, and then fetched by e.g. a chatroom's link preview service." 
+                p {
+                    "Automeme generates memes and serves them over HTTP in a human-friendly way. URLs are designed to be easily type-able to predictably generate the desired image, and then fetched by e.g. a chatroom's link preview service."
                 }
                 p {
                     "To get an image with the default text, simply fetch the image by template name from /{template-name}. For instance, you can get the surprised pikachu meme from " a href="pikachu" { "/pikachu" } " or the \"Wouldn't you like to know, weatherboy?\" meme from " a href="weatherboy" { "/weatherboy" } "."
@@ -316,14 +316,14 @@ async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Resu
                 }
                 @for template in templates.values() {
                     a href=(template.template_name) {
-                        img 
+                        img
                             src=(template.template_name)
                             title=(template.template_name)
                             style="max-height:250px; max-width:300px; margin:20px;"
                             {}
                     }
                 }
-                p { 
+                p {
                     "You can find the source for this project at " a href="https://github.com/wasabipesto/automeme" { "https://github.com/wasabipesto/automeme" } "."
                 }
             }
@@ -442,9 +442,7 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        let req = test::TestRequest::default()
-            .uri("/")
-            .to_request();
+        let req = test::TestRequest::default().uri("/").to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
     }
