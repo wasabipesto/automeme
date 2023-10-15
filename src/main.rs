@@ -4,6 +4,7 @@
 
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
+#![allow(clippy::unused_async)]
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use core::u8;
@@ -377,7 +378,7 @@ async fn main() -> Result<()> {
             .service(template_fulltext)
             .service(template_sed)
     })
-    .bind("0.0.0.0:8080")?
+    .bind("0.0.0.0:8888")?
     .run()
     .await
 }

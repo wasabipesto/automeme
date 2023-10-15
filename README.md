@@ -22,6 +22,48 @@ Replaces all text in the template with the given text. Use `|` to move to the ne
 
 Replaces text in the template with the given regular expression. No pattern matching, just basic replacement.
 
+## Running
+
+You can build this in rust:
+
+```
+# Install rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Clone this repo
+git clone git@github.com:wasabipesto/automeme.git
+cd automeme
+
+# Test or run clippy
+cargo test
+cargo clippy
+
+# Build the binary
+cargo build -r
+target/release/automeme
+
+# Or run directly
+cargo run -r
+```
+
+You can build and run with Docker:
+
+```
+# Clone this repo
+git clone git@github.com:wasabipesto/automeme.git
+cd automeme
+
+# Build the image
+docker build -t automeme .
+
+# Run the image
+docker run -d \
+    -p 8888:8888 \
+    --restart unless-stopped \
+    --name automeme \
+    automeme
+```
+
 ## Sources
 
 ### Images
