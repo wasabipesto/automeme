@@ -14,6 +14,10 @@ fi
 
 # build and deploy the docker image
 docker build -t automeme .
+if [ $? != 0 ]; then
+    exit
+fi
+
 docker stop automeme
 docker rm automeme
 docker run -d \
