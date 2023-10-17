@@ -168,9 +168,10 @@ fn get_template_data(
     }
 
     // Find matching template
-    templates
-        .get(&template_name)
-        .map(|template| get_template_resources(template, images, fonts))
+    templates.get(&template_name).map(|template| {
+        println!("Serving template {}", &template.template_name);
+        get_template_resources(template, images, fonts)
+    })
 }
 
 /// Cleans a path and turns it into usable text.
@@ -443,6 +444,46 @@ mod tests {
         )
         .await;
         let req = test::TestRequest::default().uri("/").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+    }
+
+    #[actix_web::test]
+    async fn test_template_pikachu_default() {
+        let (templates, images, fonts) = load_all_resources();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .app_data(web::Data::new(images.clone()))
+                .app_data(web::Data::new(fonts.clone()))
+                .service(template_index)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_sed),
+        )
+        .await;
+        let req = test::TestRequest::default().uri("/pikachu").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+    }
+
+    #[actix_web::test]
+    async fn test_template_pikachu_fulltext() {
+        let (templates, images, fonts) = load_all_resources();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .app_data(web::Data::new(images.clone()))
+                .app_data(web::Data::new(fonts.clone()))
+                .service(template_index)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_sed),
+        )
+        .await;
+        let req = test::TestRequest::default()
+            .uri("/pikachu/f/test")
+            .to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
     }
