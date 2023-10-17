@@ -9,7 +9,7 @@
             "ymin": 25,
             "width": 970,
             "height": 200,
-            "max_size": 50,
+            "max_size": 150,
             "uppercase": true,
             "color": [255, 255, 255]
         }

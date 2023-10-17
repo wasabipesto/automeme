@@ -1,0 +1,17 @@
+{
+    "template_name": "this-is-fine",
+    "image_path": "images/this-is-fine.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "xmin": 15,
+            "ymin": 15,
+            "width": 220,
+            "height": 50,
+            "max_size": 50,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        }
+    ]
+}

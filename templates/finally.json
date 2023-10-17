@@ -9,7 +9,7 @@
             "ymin": 25,
             "width": 1923,
             "height": 200,
-            "max_size": 100,
+            "max_size": 150,
             "uppercase": true,
             "color": [255, 255, 255]
         },
@@ -19,7 +19,7 @@
             "ymin": 1100,
             "width": 1923,
             "height": 200,
-            "max_size": 100,
+            "max_size": 150,
             "uppercase": true,
             "color": [255, 255, 255]
         }
