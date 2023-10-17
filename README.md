@@ -76,6 +76,7 @@ docker run -d \
 - `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), scaled up 2x
 - `shirt.png`: [KLE Custom Imaging](https://klecustomimaging.com/product/t-shirt/) (better versions desired)
 - `spiderman-crew.jpg`: [Meming Wiki](https://en.meming.world/wiki/Me_and_the_Boys)
+- `this-is-fine.jpg`: [Meming Wiki](https://en.meming.world/wiki/This_Is_Fine)
 - `through-god.png`: Frame pulled directly from video file
 - `thomas-bullshit.png`: [Know Your Meme](https://knowyourmeme.com/memes/thomas-had-never-seen-such-bullshit-before)
 - `train-bus.jpg`: [Meming Wiki](https://en.meming.world/wiki/Train_Hitting_School_Bus)
