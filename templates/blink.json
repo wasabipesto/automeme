@@ -1,0 +1,17 @@
+{
+    "template_name": "blink",
+    "image_path": "images/blink.png",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "xmin": 25,
+            "ymin": 900,
+            "width": 2060,
+            "height": 200,
+            "max_size": 150,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        }
+    ]
+}

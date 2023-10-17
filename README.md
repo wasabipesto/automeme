@@ -71,6 +71,7 @@ docker run -d \
 - `1984.jpg`: [Know Your Meme](templates/afraid-to-ask.json)
 - `afraid-to-ask.jpg`: [Meming Wiki](https://en.meming.world/wiki/Afraid_To_Ask_Andy)
 - `biggus.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/biggus-dickus)
+- `blink.png`: [Redd/r/MemeRestorationit](https://old.reddit.com/r/MemeRestoration/comments/hqygs3/blinking_white_guy_carefully_adjusted_upscale/)
 - `cash-money.png`: Frame pulled directly from [this reddit video](https://old.reddit.com/r/GODZILLA/comments/kn4tbt/that_wasnt_very_cash_money_of_you_godzilla/)
 - `finally.jpg`: [Know Your Meme](https://knowyourmeme.com/photos/1670182-finally-synthetic-watermelon)
 - `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), scaled up 2x
@@ -80,7 +81,7 @@ docker run -d \
 - `through-god.png`: Frame pulled directly from video file
 - `thomas-bullshit.png`: [Know Your Meme](https://knowyourmeme.com/memes/thomas-had-never-seen-such-bullshit-before)
 - `train-bus.jpg`: [Meming Wiki](https://en.meming.world/wiki/Train_Hitting_School_Bus)
-- `von-ron-car.jpg`: [Reddit](https://old.reddit.com/r/MemeRestoration/comments/euoagt/ucantflys_request_vin_diesel_and_ron_weasley/)
+- `von-ron-car.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/euoagt/ucantflys_request_vin_diesel_and_ron_weasley/)
 - `weatherboy.png`: Frame pulled directly from [this Youtube video](https://youtu.be/py44k46RR_0)
 
 ### Fonts
