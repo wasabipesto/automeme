@@ -1,0 +1,27 @@
+{
+    "template_name": "finally",
+    "image_path": "images/finally.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "finally",
+            "xmin": 25,
+            "ymin": 25,
+            "width": 1923,
+            "height": 200,
+            "max_size": 100,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        },
+        {
+            "text": "",
+            "xmin": 25,
+            "ymin": 1100,
+            "width": 1923,
+            "height": 200,
+            "max_size": 100,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        }
+    ]
+}
