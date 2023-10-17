@@ -68,6 +68,7 @@ docker run -d \
 
 ### Images
 
+- `1984.jpg`: [Know Your Meme](templates/afraid-to-ask.json)
 - `afraid-to-ask.jpg`: [Meming Wiki](https://en.meming.world/wiki/Afraid_To_Ask_Andy)
 - `biggus.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/biggus-dickus)
 - `cash-money.png`: Frame pulled directly from [this reddit video](https://old.reddit.com/r/GODZILLA/comments/kn4tbt/that_wasnt_very_cash_money_of_you_godzilla/)
