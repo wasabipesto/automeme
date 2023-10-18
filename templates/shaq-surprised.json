@@ -1,0 +1,17 @@
+{
+    "template_name": "shaq-surprised",
+    "image_path": "images/shaq-surprised.png",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "xmin": 25,
+            "ymin": 595,
+            "width": 1180,
+            "height": 100,
+            "max_size": 80,
+            "uppercase": true,
+            "color": [255, 255, 255]
+        }
+    ]
+}
