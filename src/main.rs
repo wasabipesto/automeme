@@ -322,15 +322,15 @@ async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -
             }
             body style="margin:20px;" {
                 p {
-                    a href=("/") { "🔙 Back to home." }
+                    a href=("/") { "Back to normal index." }
                 }
                 @for template in templates.values() {
-                    @let path = format!("{template_name}/f/{lorem}|{lorem}|{lorem}|{lorem}", template_name=template.template_name, lorem=LOREM_IPSUM);
+                    @let path = format!("{}/l", template.template_name);
                     a href=(path) {
                         img
                             src=(path)
                             title=(template.template_name)
-                            style="max-height:500px; max-width:600px; margin:20px;"
+                            style="max-height:350px; max-width:400px; margin:20px;"
                             {}
                     }
                 }
@@ -381,7 +381,28 @@ async fn template_fulltext(
     }
 }
 
-/// Renders a template with entirely user-given text.
+/// Renders a template with lorem ipsum text.
+#[get("/{template_name}/l")]
+async fn template_lorem(
+    path: web::Path<String>,
+    templates: web::Data<HashMap<String, Template>>,
+) -> impl Responder {
+    let template_name = path.into_inner();
+    match get_template_data(template_name, &templates) {
+        Some(template) => {
+            let mut image = template.image;
+            let lorem_vec = vec![String::from(LOREM_IPSUM); template.text_fields.len()];
+            let text_fields = override_text_fields(template.text_fields, lorem_vec);
+            for text_field in text_fields {
+                image = add_text_to_image(&text_field, image, &template.font);
+            }
+            serve_image_to_client(&image)
+        }
+        None => HttpResponse::NotFound().finish(),
+    }
+}
+
+/// Renders a template by replacing text via a simple pattern.
 #[get("/{template_name}/s/{old_text}/{new_text}")]
 async fn template_sed(
     path: web::Path<(String, String, String)>,
@@ -417,9 +438,10 @@ async fn main() -> Result<()> {
             .service(template_index_lorem)
             .service(template_default)
             .service(template_fulltext)
+            .service(template_lorem)
             .service(template_sed)
     })
-    .bind(env::var("HTTP_BIND").unwrap_or_else(|_| String::from("0.0.0.0:8888")))?
+    .bind(env::var("HTTP_BIND").unwrap_or(String::from("0.0.0.0:8888")))?
     .run()
     .await
 }
@@ -439,6 +461,7 @@ mod tests {
                 .service(template_index_lorem)
                 .service(template_default)
                 .service(template_fulltext)
+                .service(template_lorem)
                 .service(template_sed),
         )
         .await;
@@ -457,6 +480,7 @@ mod tests {
                 .service(template_index_lorem)
                 .service(template_default)
                 .service(template_fulltext)
+                .service(template_lorem)
                 .service(template_sed),
         )
         .await;
@@ -475,6 +499,7 @@ mod tests {
                 .service(template_index_lorem)
                 .service(template_default)
                 .service(template_fulltext)
+                .service(template_lorem)
                 .service(template_sed),
         )
         .await;
