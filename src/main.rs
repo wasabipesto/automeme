@@ -19,7 +19,7 @@ use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
-use std::fs::File;
+use std::fs::{metadata, File};
 use std::io::{Cursor, Read, Result, Seek, SeekFrom};
 
 const FONT_GEOMETRY_SCALE: f32 = 60.0;
@@ -36,6 +36,15 @@ struct Template {
     /// The relative path of the font from the project root, also used as a lookup key
     font_path: String,
     /// All places text can go in an image
+    text_fields: Vec<TextField>,
+}
+
+/// The full version of the template with loaded data.
+#[derive(Debug, Clone)]
+struct TemplateFull {
+    // template_name: String,
+    image: RgbImage,
+    font: Font,
     text_fields: Vec<TextField>,
 }
 
@@ -59,12 +68,9 @@ struct TextField {
     border_color: [u8; 3],
 }
 
-/// Load all resources necessary for server startup.
-fn load_all_resources() -> (
-    HashMap<String, Template>,
-    HashMap<String, RgbImage>,
-    HashMap<String, Font>,
-) {
+/// Load all resources necessary for server startup and check that all
+/// referenced files exist.
+fn load_templates() -> HashMap<String, Template> {
     println!("Server starting...");
 
     // Load and deserialize all JSON files in the templates directory.
@@ -79,67 +85,54 @@ fn load_all_resources() -> (
             (template.template_name.clone(), template)
         })
         .collect();
+
+    // Check all referenced files exist
+    for template in templates.values() {
+        assert!(
+            metadata(&template.image_path).is_ok(),
+            "Could not find file {}",
+            &template.image_path
+        );
+        assert!(
+            metadata(&template.image_path).is_ok(),
+            "Could not find file {}",
+            &template.image_path
+        );
+    }
+
     println!("Loaded {} templates.", templates.len());
-
-    // Load all images referred to by templates and convert to RGB8.
-    let images: HashMap<String, RgbImage> = templates
-        .iter()
-        .map(|(_, template)| {
-            let file = image::open(&template.image_path);
-            match file {
-                Ok(image) => (template.image_path.clone(), image.to_rgb8()),
-                Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
-            }
-        })
-        .collect();
-    println!("Loaded {} images.", images.len());
-
-    // Load all fonts referred to by templates and parses them.
-    let fonts: HashMap<String, Font> = templates
-        .iter()
-        .map(|(_, template)| {
-            let mut font_bytes = Vec::new();
-            let file = File::open(&template.font_path)
-                .and_then(|mut font_file| font_file.read_to_end(&mut font_bytes));
-            match file {
-                Ok(_) => (),
-                Err(e) => panic!("Could not open file {} {}", &template.font_path, e),
-            }
-            let font_data = Font::from_bytes(
-                font_bytes,
-                FontSettings {
-                    collection_index: 0,
-                    scale: FONT_GEOMETRY_SCALE,
-                },
-            )
-            .expect("Failed to load font data");
-            (template.font_path.clone(), font_data)
-        })
-        .collect();
-    println!("Loaded {} fonts.", fonts.len());
-
-    (templates, images, fonts)
+    templates
 }
 
 /// Given a Template, return a tuple of that Template plus the associated image
 /// and font data. Panics if the image or font could not be found since they
-/// should have been loaded at startup.
-fn get_template_resources(
-    template: &Template,
-    images: &web::Data<HashMap<String, RgbImage>>,
-    fonts: &web::Data<HashMap<String, Font>>,
-) -> (Template, RgbImage, Font) {
-    (
-        template.clone(),
-        images
-            .get(&template.image_path)
-            .expect("Failed to get cached image")
-            .clone(),
-        fonts
-            .get(&template.font_path)
-            .expect("Failed to get cached font")
-            .clone(),
-    )
+/// should have been checked at startup.
+fn get_template_resources(template: &Template) -> TemplateFull {
+    TemplateFull {
+        //template_name: template.template_name.clone(),
+        image: match image::open(&template.image_path) {
+            Ok(image) => image.to_rgb8(),
+            Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
+        },
+        font: match File::open(&template.font_path) {
+            Ok(mut font_file) => {
+                let mut font_bytes = Vec::new();
+                font_file
+                    .read_to_end(&mut font_bytes)
+                    .expect("Failed to read font data");
+                Font::from_bytes(
+                    font_bytes,
+                    FontSettings {
+                        collection_index: 0,
+                        scale: FONT_GEOMETRY_SCALE,
+                    },
+                )
+                .expect("Failed to load font data")
+            }
+            Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
+        },
+        text_fields: template.text_fields.clone(),
+    }
 }
 
 /// Given a template name, get all assciated data. Returns None if the template
@@ -147,19 +140,17 @@ fn get_template_resources(
 fn get_template_data(
     template_name: String,
     templates: &web::Data<HashMap<String, Template>>,
-    images: &web::Data<HashMap<String, RgbImage>>,
-    fonts: &web::Data<HashMap<String, Font>>,
-) -> Option<(Template, RgbImage, Font)> {
+) -> Option<TemplateFull> {
     // Special case - random
     if template_name == "random" {
         let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
-        return Some(get_template_resources(template, images, fonts));
+        return Some(get_template_resources(template));
     }
 
     // Find matching template
     templates.get(&template_name).map(|template| {
         println!("Serving template {}", &template.template_name);
-        get_template_resources(template, images, fonts)
+        get_template_resources(template)
     })
 }
 
@@ -207,8 +198,8 @@ fn regex_text_fields(
 fn get_field_text_layout(text_field: &TextField) -> Layout {
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
     layout.reset(&LayoutSettings {
-        x: text_field.start[0].clone(),
-        y: text_field.start[1].clone(),
+        x: text_field.start[0],
+        y: text_field.start[1],
         max_height: Some(text_field.end[1] - text_field.start[1]),
         max_width: Some(text_field.end[0] - text_field.start[0]),
         horizontal_align: HorizontalAlign::Center,
@@ -353,15 +344,13 @@ async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -
 async fn template_default(
     path: web::Path<String>,
     templates: web::Data<HashMap<String, Template>>,
-    images: web::Data<HashMap<String, RgbImage>>,
-    fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
     let template_name = path.into_inner();
-    match get_template_data(template_name, &templates, &images, &fonts) {
-        Some((template, template_image, font)) => {
-            let mut image = template_image.clone();
+    match get_template_data(template_name, &templates) {
+        Some(template) => {
+            let mut image = template.image;
             for text_field in template.text_fields {
-                image = add_text_to_image(&text_field, image, &font);
+                image = add_text_to_image(&text_field, image, &template.font);
             }
             serve_image_to_client(&image)
         }
@@ -374,19 +363,17 @@ async fn template_default(
 async fn template_fulltext(
     path: web::Path<(String, String)>,
     templates: web::Data<HashMap<String, Template>>,
-    images: web::Data<HashMap<String, RgbImage>>,
-    fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
-    match get_template_data(template_name, &templates, &images, &fonts) {
-        Some((template, template_image, font)) => {
-            let mut image = template_image.clone();
+    match get_template_data(template_name, &templates) {
+        Some(template) => {
+            let mut image = template.image;
             let text_fields = override_text_fields(
                 template.text_fields,
                 clean_text_to_vec(path_to_clean_text(full_text)),
             );
             for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &font);
+                image = add_text_to_image(&text_field, image, &template.font);
             }
             serve_image_to_client(&image)
         }
@@ -399,20 +386,18 @@ async fn template_fulltext(
 async fn template_sed(
     path: web::Path<(String, String, String)>,
     templates: web::Data<HashMap<String, Template>>,
-    images: web::Data<HashMap<String, RgbImage>>,
-    fonts: web::Data<HashMap<String, Font>>,
 ) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
-    match get_template_data(template_name, &templates, &images, &fonts) {
-        Some((template, template_image, font)) => {
-            let mut image = template_image.clone();
+    match get_template_data(template_name, &templates) {
+        Some(template) => {
+            let mut image = template.image;
             let text_fields = regex_text_fields(
                 template.text_fields,
                 path_to_clean_text(old_text),
                 path_to_clean_text(new_text),
             );
             for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &font);
+                image = add_text_to_image(&text_field, image, &template.font);
             }
             serve_image_to_client(&image)
         }
@@ -424,12 +409,10 @@ async fn template_sed(
 #[actix_web::main]
 async fn main() -> Result<()> {
     // Start the server
-    let (templates, images, fonts) = load_all_resources();
+    let templates = load_templates();
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(templates.clone()))
-            .app_data(web::Data::new(images.clone()))
-            .app_data(web::Data::new(fonts.clone()))
             .service(template_index)
             .service(template_index_lorem)
             .service(template_default)
@@ -448,12 +431,10 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_index() {
-        let (templates, images, fonts) = load_all_resources();
+        let templates = load_templates();
         let app = test::init_service(
             App::new()
                 .app_data(web::Data::new(templates.clone()))
-                .app_data(web::Data::new(images.clone()))
-                .app_data(web::Data::new(fonts.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -468,12 +449,10 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_default() {
-        let (templates, images, fonts) = load_all_resources();
+        let templates = load_templates();
         let app = test::init_service(
             App::new()
                 .app_data(web::Data::new(templates.clone()))
-                .app_data(web::Data::new(images.clone()))
-                .app_data(web::Data::new(fonts.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -488,12 +467,10 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_fulltext() {
-        let (templates, images, fonts) = load_all_resources();
+        let templates = load_templates();
         let app = test::init_service(
             App::new()
                 .app_data(web::Data::new(templates.clone()))
-                .app_data(web::Data::new(images.clone()))
-                .app_data(web::Data::new(fonts.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
