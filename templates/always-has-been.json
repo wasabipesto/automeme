@@ -1,22 +1,22 @@
 {
-    "template_name": "all-the-things",
-    "image_path": "images/all-the-things.jpeg",
+    "template_name": "always-has-been",
+    "image_path": "images/always-has-been.jpg",
     "font_path": "fonts/Anton-Regular.ttf",
     "text_fields": [
         {
-            "text": "do",
+            "text": "wait, it's all ohio?",
             "uppercase": true,
-            "start": [25, 25],
-            "end": [1895, 300],
+            "start": [700, 350],
+            "end": [1200, 480],
             "text_size": 150,
             "text_color": [255, 255, 255],
             "border_color": [0, 0, 0]
         },
         {
-            "text": "all the things",
+            "text": "always has been",
             "uppercase": true,
-            "start": [25, 1185],
-            "end": [1895, 1485],
+            "start": [1350, 25],
+            "end": [1895, 125],
             "text_size": 150,
             "text_color": [255, 255, 255],
             "border_color": [0, 0, 0]
