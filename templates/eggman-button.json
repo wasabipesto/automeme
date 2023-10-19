@@ -1,0 +1,16 @@
+{
+    "template_name": "eggman-button",
+    "image_path": "images/eggman-button.jpg",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [190, 330],
+            "end": [860, 540],
+            "text_size": 150,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

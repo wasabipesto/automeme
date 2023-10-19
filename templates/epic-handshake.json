@@ -1,0 +1,24 @@
+{
+    "template_name": "epic-handshake",
+    "image_path": "images/epic-handshake.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [50, 1200],
+            "end": [1297, 1900],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [1397, 1200],
+            "end": [2644, 1900],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

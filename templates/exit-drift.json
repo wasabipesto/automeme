@@ -1,0 +1,24 @@
+{
+    "template_name": "exit-drift",
+    "image_path": "images/exit-drift.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [210, 120],
+            "end": [360, 310],
+            "text_size": 50,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [480, 120],
+            "end": [700, 310],
+            "text_size": 50,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

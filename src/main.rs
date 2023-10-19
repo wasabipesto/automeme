@@ -141,6 +141,8 @@ fn get_template_data(
     template_name: String,
     templates: &web::Data<HashMap<String, Template>>,
 ) -> Option<TemplateFull> {
+    println!("Serving template {}", &template_name);
+    
     // Special case - random
     if template_name == "random" {
         let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
@@ -149,7 +151,6 @@ fn get_template_data(
 
     // Find matching template
     templates.get(&template_name).map(|template| {
-        println!("Serving template {}", &template.template_name);
         get_template_resources(template)
     })
 }

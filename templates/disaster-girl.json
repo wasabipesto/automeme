@@ -1,0 +1,16 @@
+{
+    "template_name": "disaster-girl",
+    "image_path": "images/disaster-girl.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 1375],
+            "end": [2350, 1775],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "template_name": "call-an-ambulance",
+    "image_path": "images/ambulance.jpg",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "Call an ambulance!",
+            "uppercase": false,
+            "start": [25, 843],
+            "end": [1895, 1043],
+            "text_size": 100,
+            "text_color": [240, 240, 120],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "But not for me!",
+            "uppercase": false,
+            "start": [25, 1911],
+            "end": [1895, 2111],
+            "text_size": 100,
+            "text_color": [240, 240, 120],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

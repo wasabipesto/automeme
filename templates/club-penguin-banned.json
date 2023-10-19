@@ -1,0 +1,16 @@
+{
+    "template_name": "club-penguin-banned",
+    "image_path": "images/club-penguin-banned.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": false,
+            "start": [50, 390],
+            "end": [1006, 520],
+            "text_size": 100,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}
