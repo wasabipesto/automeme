@@ -1,0 +1,16 @@
+{
+    "template_name": "god-said",
+    "image_path": "images/god-said.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": false,
+            "start": [600, 575],
+            "end": [1110, 1075],
+            "text_size": 100,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "template_name": "fry-not-sure",
+    "image_path": "images/fry-not-sure.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 25],
+            "end": [2545, 325],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [25, 1475],
+            "end": [2545, 1775],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

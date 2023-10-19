@@ -1,0 +1,16 @@
+{
+    "template_name": "honest-work",
+    "image_path": "images/honest-work.jpg",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "It ain't much, but it's honest work.",
+            "uppercase": false,
+            "start": [50, 1600],
+            "end": [2933, 1900],
+            "text_size": 150,
+            "text_color": [240, 240, 120],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "template_name": "if-i-had-one",
+    "image_path": "images/if-i-had-one.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "this is where I would put my trophy",
+            "uppercase": true,
+            "start": [15, 15],
+            "end": [520, 110],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "if I had one",
+            "uppercase": true,
+            "start": [15, 700],
+            "end": [520, 785],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

@@ -1,0 +1,48 @@
+{
+    "template_name": "knights-agreement",
+    "image_path": "images/knights-agreement.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [30, 820],
+            "end": [330, 920],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [320, 670],
+            "end": [620, 770],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [680, 770],
+            "end": [980, 870],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [570, 1200],
+            "end": [870, 1300],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [150, 1200],
+            "end": [450, 1300],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

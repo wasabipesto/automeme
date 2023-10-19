@@ -1,0 +1,24 @@
+{
+    "template_name": "invincible-look",
+    "image_path": "images/invincible-look.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [60, 210],
+            "end": [500, 400],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "look what they need to mimic a fraction of our power",
+            "uppercase": true,
+            "start": [25, 1221],
+            "end": [1257, 1421],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

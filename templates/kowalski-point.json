@@ -1,0 +1,16 @@
+{
+    "template_name": "kowalski-point",
+    "image_path": "images/kowalski-point.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": false,
+            "start": [1050, 330],
+            "end": [1700, 630],
+            "text_size": 150,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

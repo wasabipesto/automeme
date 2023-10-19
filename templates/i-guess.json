@@ -1,0 +1,16 @@
+{
+    "template_name": "i-guess",
+    "image_path": "images/i-guess.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 989],
+            "end": [1175, 1289],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

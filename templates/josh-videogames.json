@@ -1,0 +1,16 @@
+{
+    "template_name": "josh-videogames",
+    "image_path": "images/josh-videogames.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "videogames",
+            "uppercase": true,
+            "start": [25, 821],
+            "end": [971, 971],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

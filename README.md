@@ -68,7 +68,7 @@ docker run -d \
 
 ### Images
 
-- `1984.jpg`: [Know Your Meme](templates/afraid-to-ask.json)
+- `1984.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/living-in-1984)
 - `afraid-to-ask.jpg`: [Meming Wiki](https://en.meming.world/wiki/Afraid_To_Ask_Andy)
 - `agnes-wink.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `all-the-things.jpeg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
@@ -88,7 +88,7 @@ docker run -d \
 - `bugs-no.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/bugs-bunnys-no)
 - `bugs-shoot.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `buzz-everywhere.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
-- `cash-money.png`: Frame pulled directly from [this reddit video](https://old.reddit.com/r/GODZILLA/comments/kn4tbt/that_wasnt_very_cash_money_of_you_godzilla/)
+- `cash-money.png`: [This reddit video](https://old.reddit.com/r/GODZILLA/comments/kn4tbt/that_wasnt_very_cash_money_of_you_godzilla/)
 - `cat-wtf.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `change-team.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `club-penguin-banned.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
@@ -117,7 +117,6 @@ docker run -d \
 - `hulk-tacos.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `i-guess.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `if-i-had-one.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
-- `inhaling-seagull.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `invincible-look.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `josh-videogames.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `kekw.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
@@ -135,8 +134,9 @@ docker run -d \
 - `nemo-mine.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `office-same-picture.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `one-does-not-simply.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
-- `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu), scaled up 2x
+- `pikachu.png`: [Meming Wiki](https://en.meming.world/wiki/Surprised_Pikachu)
 - `political-compass.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
+- `seagull-yell.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `shaq-surprised.png` [Know Your Meme](https://knowyourmeme.com/photos/1474527-shaqs-hot-ones-interview)
 - `shirt.png`: [KLE Custom Imaging](https://klecustomimaging.com/product/t-shirt/) (better versions desired)
 - `shrek-yell.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
