@@ -22,6 +22,7 @@ use std::fs::File;
 use std::io::{Cursor, Read, Result, Seek, SeekFrom};
 
 const FONT_GEOMETRY_SCALE: f32 = 60.0;
+const LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
 /// Data from the JSON template files. At startup these are loaded in and then the
 /// image and font paths are checked and loaded as well.
@@ -43,22 +44,18 @@ struct Template {
 struct TextField {
     /// The text that goes in each field
     text: String,
-    /// Distance from the left, in pixels, where the text field begins
-    xmin: f32,
-    /// Distance from the top, in pixels, where the text field begins
-    ymin: f32,
-    /// Width of the field in pixels
-    width: f32,
-    /// Height of the field in pixels
-    height: f32,
-    /// Maximum size of the text in this field
-    max_size: f32,
     /// Whether the text should be forced into uppercase
     uppercase: bool,
+    /// Distance from the top-left, in [x, y] pixels, where the text field begins
+    start: [f32; 2],
+    /// Distance from the top-left, in [x, y] pixels, where the text field ends
+    end: [f32; 2],
+    /// Default size of the text in this field
+    text_size: f32,
     /// Color of the text in RGB
-    color: [u8; 3],
-    // Color of the text border in RGB
-    //border_color: [u8; 3],
+    text_color: [u8; 3],
+    /// Color of the text border in RGB
+    border_color: [u8; 3],
 }
 
 /// Load all resources necessary for server startup.
@@ -67,20 +64,10 @@ fn load_all_resources() -> (
     HashMap<String, RgbImage>,
     HashMap<String, Font>,
 ) {
-    // Load in all resources
     println!("Server starting...");
-    let templates = load_templates();
-    println!("Loaded {} templates.", templates.len());
-    let images = load_images(&templates);
-    println!("Loaded {} images.", images.len());
-    let fonts = load_fonts(&templates);
-    println!("Loaded {} fonts.", fonts.len());
-    (templates, images, fonts)
-}
 
-/// Load and deserialize all JSON files in the templates directory.
-fn load_templates() -> HashMap<String, Template> {
-    glob("templates/*.json")
+    // Load and deserialize all JSON files in the templates directory.
+    let templates: HashMap<String, Template> = glob("templates/*.json")
         .expect("Failed to resolve glob pattern")
         .filter_map(std::result::Result::ok)
         .map(|file_path| {
@@ -90,12 +77,11 @@ fn load_templates() -> HashMap<String, Template> {
                 serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
             (template.template_name.clone(), template)
         })
-        .collect()
-}
+        .collect();
+    println!("Loaded {} templates.", templates.len());
 
-/// Load all images referred to by templates and convert to RGB8.
-fn load_images(templates: &HashMap<String, Template>) -> HashMap<String, RgbImage> {
-    templates
+    // Load all images referred to by templates and convert to RGB8.
+    let images: HashMap<String, RgbImage> = templates
         .iter()
         .map(|(_, template)| {
             let file = image::open(&template.image_path);
@@ -104,12 +90,11 @@ fn load_images(templates: &HashMap<String, Template>) -> HashMap<String, RgbImag
                 Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
             }
         })
-        .collect()
-}
+        .collect();
+    println!("Loaded {} images.", images.len());
 
-/// Load all fonts referred to by templates and parses them.
-fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
-    templates
+    // Load all fonts referred to by templates and parses them.
+    let fonts: HashMap<String, Font> = templates
         .iter()
         .map(|(_, template)| {
             let mut font_bytes = Vec::new();
@@ -129,7 +114,10 @@ fn load_fonts(templates: &HashMap<String, Template>) -> HashMap<String, Font> {
             .expect("Failed to load font data");
             (template.font_path.clone(), font_data)
         })
-        .collect()
+        .collect();
+    println!("Loaded {} fonts.", fonts.len());
+
+    (templates, images, fonts)
 }
 
 /// Given a Template, return a tuple of that Template plus the associated image
@@ -218,10 +206,10 @@ fn regex_text_fields(
 fn get_field_text_layout(text_field: &TextField) -> Layout {
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
     layout.reset(&LayoutSettings {
-        x: text_field.xmin,
-        y: text_field.ymin,
-        max_height: Some(text_field.height),
-        max_width: Some(text_field.width),
+        x: text_field.start[0].clone(),
+        y: text_field.start[1].clone(),
+        max_height: Some(text_field.end[1] - text_field.start[1]),
+        max_width: Some(text_field.end[0] - text_field.start[0]),
         horizontal_align: HorizontalAlign::Center,
         vertical_align: VerticalAlign::Middle,
         wrap_style: WrapStyle::Word,
@@ -235,8 +223,8 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     let mut layout = get_field_text_layout(text_field);
 
     // Set interior & border color
-    let pixel_interior: Rgb<u8> = Rgb(text_field.color);
-    let pixel_border: Rgb<u8> = Rgb([0, 0, 0]);
+    let pixel_interior: Rgb<u8> = Rgb(text_field.text_color);
+    let pixel_border: Rgb<u8> = Rgb(text_field.border_color);
 
     // Optionally convert to uppercase
     let text = if text_field.uppercase {
@@ -246,7 +234,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     };
 
     // Add text to layout
-    let mut text_size = text_field.max_size;
+    let mut text_size = text_field.text_size;
     layout.append(&[font], &TextStyle::new(&text, text_size, 0));
 
     // Shrink text to fit the field if necessary
@@ -326,6 +314,33 @@ async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Resu
                 }
                 p {
                     "You can find the source for this project at " a href="https://github.com/wasabipesto/automeme" { "https://github.com/wasabipesto/automeme" } "."
+                }
+            }
+        }
+    })
+}
+
+/// Renders all templates with lorem ipsum text for bounds testing.
+#[get("/lorem")]
+async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
+    Ok(html! {
+        html {
+            head {
+                title { "😂 automeme" }
+            }
+            body style="margin:20px;" {
+                p {
+                    a href=("/") { "🔙 Back to home." }
+                }
+                @for template in templates.values() {
+                    @let path = format!("{template_name}/f/{lorem}|{lorem}|{lorem}|{lorem}", template_name=template.template_name, lorem=LOREM_IPSUM);
+                    a href=(path) {
+                        img
+                            src=(path)
+                            title=(template.template_name)
+                            style="max-height:500px; max-width:600px; margin:20px;"
+                            {}
+                    }
                 }
             }
         }
@@ -415,6 +430,7 @@ async fn main() -> Result<()> {
             .app_data(web::Data::new(images.clone()))
             .app_data(web::Data::new(fonts.clone()))
             .service(template_index)
+            .service(template_index_lorem)
             .service(template_default)
             .service(template_fulltext)
             .service(template_sed)
@@ -438,6 +454,7 @@ mod tests {
                 .app_data(web::Data::new(images.clone()))
                 .app_data(web::Data::new(fonts.clone()))
                 .service(template_index)
+                .service(template_index_lorem)
                 .service(template_default)
                 .service(template_fulltext)
                 .service(template_sed),
@@ -457,6 +474,7 @@ mod tests {
                 .app_data(web::Data::new(images.clone()))
                 .app_data(web::Data::new(fonts.clone()))
                 .service(template_index)
+                .service(template_index_lorem)
                 .service(template_default)
                 .service(template_fulltext)
                 .service(template_sed),
@@ -476,6 +494,7 @@ mod tests {
                 .app_data(web::Data::new(images.clone()))
                 .app_data(web::Data::new(fonts.clone()))
                 .service(template_index)
+                .service(template_index_lorem)
                 .service(template_default)
                 .service(template_fulltext)
                 .service(template_sed),

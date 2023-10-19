@@ -5,13 +5,12 @@
     "text_fields": [
         {
             "text": "Well, first of all, through God, all things are possible, so jot that down.",
-            "xmin": 25,
-            "ymin": 304,
-            "width": 670,
-            "height": 75,
-            "max_size": 30,
             "uppercase": false,
-            "color": [255, 255, 255]
+            "start": [25, 300],
+            "end": [695, 375],
+            "text_size": 30,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
         }
     ]
 }

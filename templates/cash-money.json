@@ -5,13 +5,12 @@
     "text_fields": [
         {
             "text": "that wasn't very cash money of you",
-            "xmin": 25,
-            "ymin": 855,
-            "width": 1390,
-            "height": 200,
-            "max_size": 80,
             "uppercase": false,
-            "color": [255, 255, 255]
+            "start": [25, 855],
+            "end": [1415, 1055],
+            "text_size": 80,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
         }
     ]
 }

@@ -1,17 +1,16 @@
 {
     "template_name": "spiderman-crew",
-    "image_path": "images/spiderman-crew.jpg",
+    "image_path": "images/spiderman-crew.png",
     "font_path": "fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
-            "text": "Me and the boys",
-            "xmin": 25,
-            "ymin": 25,
-            "width": 1270,
-            "height": 150,
-            "max_size": 50,
+            "text": "me and the boys",
             "uppercase": false,
-            "color": [255, 255, 255]
+            "start": [25, 25],
+            "end": [1895, 275],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
         }
     ]
 }

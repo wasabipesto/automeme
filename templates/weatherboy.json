@@ -5,13 +5,12 @@
     "text_fields": [
         {
             "text": "Wouldn't you like to know, weather boy?",
-            "xmin": 25,
-            "ymin": 800,
-            "width": 1870,
-            "height": 160,
-            "max_size": 80,
             "uppercase": false,
-            "color": [240, 240, 120]
+            "start": [25, 800],
+            "end": [1895, 960],
+            "text_size": 80,
+            "text_color": [240, 240, 120],
+            "border_color": [0, 0, 0]
         }
     ]
 }

@@ -5,23 +5,21 @@
     "text_fields": [
         {
             "text": "",
-            "xmin": 1000,
-            "ymin": 450,
-            "width": 895,
-            "height": 300,
-            "max_size": 80,
             "uppercase": true,
-            "color": [255, 255, 255]
+            "start": [950, 450],
+            "end": [1845, 750],
+            "text_size": 80,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
         },
         {
             "text": "",
-            "xmin": 400,
-            "ymin": 1225,
-            "width": 895,
-            "height": 300,
-            "max_size": 80,
             "uppercase": true,
-            "color": [255, 255, 255]
+            "start": [400, 1225],
+            "end": [1295, 1525],
+            "text_size": 80,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
         }
     ]
 }
