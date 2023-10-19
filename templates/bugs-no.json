@@ -1,0 +1,16 @@
+{
+    "template_name": "bugs-no",
+    "image_path": "images/bugs-no.jpg",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "no",
+            "uppercase": false,
+            "start": [0, 310],
+            "end": [110, 400],
+            "text_size": 50,
+            "text_color": [255, 255, 255],
+            "border_color": [255, 255, 255]
+        }
+    ]
+}

@@ -84,6 +84,7 @@ docker run -d \
 - `bill-gates-ping-pong.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `blink.png`: [Redd/r/MemeRestorationit](https://old.reddit.com/r/MemeRestoration/comments/hqygs3/blinking_white_guy_carefully_adjusted_upscale/)
 - `bliss.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
+- `bugs-no.jpg`: [Know Your Meme](https://knowyourmeme.com/memes/bugs-bunnys-no)
 - `bugs-shoot.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `buzz-everywhere.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `call-an-ambulance.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
