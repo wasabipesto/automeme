@@ -18,6 +18,7 @@ use maud::{html, Markup};
 use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::env;
 use std::fs::File;
 use std::io::{Cursor, Read, Result, Seek, SeekFrom};
 
@@ -435,7 +436,7 @@ async fn main() -> Result<()> {
             .service(template_fulltext)
             .service(template_sed)
     })
-    .bind("0.0.0.0:8888")?
+    .bind(env::var("HTTP_BIND").unwrap_or_else(|_| String::from("0.0.0.0:8888")))?
     .run()
     .await
 }
