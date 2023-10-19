@@ -1,0 +1,16 @@
+{
+    "template_name": "bliss",
+    "image_path": "images/bliss.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [50, 2450],
+            "end": [5233, 3950],
+            "text_size": 300,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

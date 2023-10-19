@@ -1,0 +1,24 @@
+{
+    "template_name": "bill-gates-ping-pong",
+    "image_path": "images/bill-gates-ping-pong.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 25],
+            "end": [1750, 225],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [550, 650],
+            "end": [1000, 850],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

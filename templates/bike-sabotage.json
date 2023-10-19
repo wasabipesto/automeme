@@ -1,0 +1,32 @@
+{
+    "template_name": "bike-sabotage",
+    "image_path": "images/bike-sabotage.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [300, 25],
+            "end": [650, 390],
+            "text_size": 50,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [300, 440],
+            "end": [650, 815],
+            "text_size": 50,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [300, 905],
+            "end": [650, 1225],
+            "text_size": 50,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

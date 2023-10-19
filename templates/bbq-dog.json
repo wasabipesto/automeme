@@ -1,0 +1,25 @@
+{
+    "template_name": "bbq-dog",
+    "image_path": "images/bbq-dog.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [40, 420],
+            "end": [300, 700],
+            "text_size": 75,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [700, 400],
+            "end": [1150, 650],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

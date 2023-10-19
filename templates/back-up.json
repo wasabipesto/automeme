@@ -1,0 +1,16 @@
+{
+    "template_name": "back-up",
+    "image_path": "images/back-up.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [825, 25],
+            "end": [1575, 775],
+            "text_size": 150,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}
