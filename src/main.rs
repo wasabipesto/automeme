@@ -5,6 +5,7 @@
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
 #![allow(clippy::unused_async)]
+#![allow(clippy::needless_pass_by_value)]
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use core::u8;
@@ -212,6 +213,8 @@ fn get_field_text_layout(text_field: &TextField) -> Layout {
 }
 
 /// Renders text onto an image for one field.
+#[allow(clippy::cast_sign_loss)]
+#[allow(clippy::cast_possible_truncation)]
 fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
     let mut layout = get_field_text_layout(text_field);
 
