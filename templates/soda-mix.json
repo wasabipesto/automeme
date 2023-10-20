@@ -1,0 +1,24 @@
+{
+    "template_name": "soda-mix",
+    "image_path": "images/soda-mix.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": false,
+            "start": [425, 200],
+            "end": [700, 600],
+            "text_size": 75,
+            "text_color": [255, 255, 255],
+            "border_color": [255, 255, 255]
+        },{
+            "text": "",
+            "uppercase": false,
+            "start": [750, 200],
+            "end": [1025, 600],
+            "text_size": 75,
+            "text_color": [255, 255, 255],
+            "border_color": [255, 255, 255]
+        }
+    ]
+}

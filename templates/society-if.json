@@ -1,0 +1,24 @@
+{
+    "template_name": "society-if",
+    "image_path": "images/society-if.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "society if",
+            "uppercase": true,
+            "start": [25, 25],
+            "end": [1985, 325],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [25, 936],
+            "end": [1985, 1236],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

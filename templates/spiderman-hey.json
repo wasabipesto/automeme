@@ -1,0 +1,16 @@
+{
+    "template_name": "spiderman-hey",
+    "image_path": "images/spiderman-hey.jpg",
+    "font_path": "fonts/Gabarito-Bold.ttf",
+    "text_fields": [
+        {
+            "text": "hey",
+            "uppercase": false,
+            "start": [25, 1500],
+            "end": [1000, 1649],
+            "text_size": 80,
+            "text_color": [240, 240, 120],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

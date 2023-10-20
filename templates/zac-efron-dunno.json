@@ -1,0 +1,16 @@
+{
+    "template_name": "zac-efron-dunno",
+    "image_path": "images/zac-efron-dunno.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 926],
+            "end": [1516, 1126],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

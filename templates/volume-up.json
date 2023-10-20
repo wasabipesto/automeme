@@ -1,0 +1,16 @@
+{
+    "template_name": "volume-up",
+    "image_path": "images/volume-up.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [50, 1461],
+            "end": [3701, 1861],
+            "text_size": 200,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

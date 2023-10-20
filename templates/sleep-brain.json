@@ -1,0 +1,16 @@
+{
+    "template_name": "sleep-brain",
+    "image_path": "images/sleep-brain.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": false,
+            "start": [70, 915],
+            "end": [870, 1150],
+            "text_size": 100,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

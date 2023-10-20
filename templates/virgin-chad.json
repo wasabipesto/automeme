@@ -1,0 +1,24 @@
+{
+    "template_name": "virgin-chad",
+    "image_path": "images/virgin-chad.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "virgin",
+            "uppercase": true,
+            "start": [100, 500],
+            "end": [700, 800],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "chad",
+            "uppercase": true,
+            "start": [900, 500],
+            "end": [1500, 800],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

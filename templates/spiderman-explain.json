@@ -1,0 +1,24 @@
+{
+    "template_name": "spiderman-explain",
+    "image_path": "images/spiderman-explain.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 1300],
+            "end": [1217, 2600],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [1267, 1300],
+            "end": [2459, 2600],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

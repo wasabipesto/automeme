@@ -1,0 +1,32 @@
+{
+    "template_name": "simpsons-toss-barney",
+    "image_path": "images/simpsons-toss-barney.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [200, 200],
+            "end": [1000, 600],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [700, 600],
+            "end": [1500, 900],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [50, 2700],
+            "end": [600, 3100],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

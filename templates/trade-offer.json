@@ -1,0 +1,24 @@
+{
+    "template_name": "trade-offer",
+    "image_path": "images/trade-offer.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [50, 400],
+            "end": [587, 650],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [687, 400],
+            "end": [1249, 650],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

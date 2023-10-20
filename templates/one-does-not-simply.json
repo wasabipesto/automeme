@@ -1,0 +1,24 @@
+{
+    "template_name": "one-does-not-simply",
+    "image_path": "images/one-does-not-simply.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "one does not simply",
+            "uppercase": true,
+            "start": [25, 25],
+            "end": [4071, 325],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "walk into mordor",
+            "uppercase": true,
+            "start": [25, 1391],
+            "end": [4071, 1691],
+            "text_size": 150,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

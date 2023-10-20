@@ -1,0 +1,24 @@
+{
+    "template_name": "trust-nobody",
+    "image_path": "images/trust-nobody.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "trust nobody",
+            "uppercase": true,
+            "start": [25, 25],
+            "end": [2839, 325],
+            "text_size": 200,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "not even yourself",
+            "uppercase": true,
+            "start": [25, 1595],
+            "end": [2839, 1895],
+            "text_size": 200,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

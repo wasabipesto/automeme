@@ -1,0 +1,24 @@
+{
+    "template_name": "soyjack-point",
+    "image_path": "images/soyjack-point.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [100, 100],
+            "end": [2800, 750],
+            "text_size": 200,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [2500, 1800],
+            "end": [4000, 2600],
+            "text_size": 200,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

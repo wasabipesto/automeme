@@ -1,0 +1,16 @@
+{
+    "template_name": "spongebob-imagination",
+    "image_path": "images/spongebob-imagination.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "imagination",
+            "uppercase": true,
+            "start": [25, 5],
+            "end": [1895, 280],
+            "text_size": 250,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

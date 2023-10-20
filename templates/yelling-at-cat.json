@@ -1,0 +1,24 @@
+{
+    "template_name": "yelling-at-cat",
+    "image_path": "images/yelling-at-cat.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [50, 1500],
+            "end": [1992, 2000],
+            "text_size": 250,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [2092, 1500],
+            "end": [4034, 2000],
+            "text_size": 250,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

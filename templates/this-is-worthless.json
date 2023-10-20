@@ -1,0 +1,16 @@
+{
+    "template_name": "this-is-worthless",
+    "image_path": "images/this-is-worthless.jpg",
+    "font_path": "fonts/Gabarito-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": false,
+            "start": [250, 250],
+            "end": [1150, 650],
+            "text_size": 100,
+            "text_color": [0, 0, 0],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}

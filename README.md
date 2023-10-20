@@ -164,7 +164,7 @@ docker run -d \
 - `virgin-chad.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `volume-up.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `von-ron-car.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/euoagt/ucantflys_request_vin_diesel_and_ron_weasley/)
-- `weatherboy.png`: Frame pulled directly from [this Youtube video](https://youtu.be/py44k46RR_0)
+- `weatherboy.png`: [This Youtube video](https://youtu.be/py44k46RR_0)
 - `woman-yelling.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 - `zac-efron-dunno.jpg`: [/r/MemeRestoration](https://old.reddit.com/r/MemeRestoration/comments/rfjhs0/hd_meme_templates_database_800_files/)
 

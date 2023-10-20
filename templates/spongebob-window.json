@@ -1,0 +1,24 @@
+{
+    "template_name": "spongebob-window",
+    "image_path": "images/spongebob-window.jpg",
+    "font_path": "fonts/Anton-Regular.ttf",
+    "text_fields": [
+        {
+            "text": "",
+            "uppercase": true,
+            "start": [25, 800],
+            "end": [800, 1065],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        },{
+            "text": "",
+            "uppercase": true,
+            "start": [750, 250],
+            "end": [1300, 600],
+            "text_size": 100,
+            "text_color": [255, 255, 255],
+            "border_color": [0, 0, 0]
+        }
+    ]
+}
