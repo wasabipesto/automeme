@@ -8,11 +8,10 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use core::u8;
 use core::cmp::max;
+use core::u8;
 use fontdue::layout::{
-    CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle,
-    VerticalAlign, WrapStyle,
+    CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle,
 };
 use fontdue::{Font, FontSettings};
 use glob::glob;
@@ -155,9 +154,7 @@ fn get_template_data(
     }
 
     // Find matching template
-    templates
-        .get(&template_name)
-        .map(get_template_resources)
+    templates.get(&template_name).map(get_template_resources)
 }
 
 /// Cleans a path and turns it into usable text.
@@ -232,20 +229,20 @@ fn generate_text_canvas(
 
                 // Determine where to blot pixels
                 let blot_start = (
-                    glyph_start.0 + x - extra_blot, 
-                    glyph_start.1 + y - extra_blot
+                    glyph_start.0 + x - extra_blot,
+                    glyph_start.1 + y - extra_blot,
                 );
                 let blot_end = (
-                    glyph_start.0 + x + extra_blot, 
-                    glyph_start.1 + y + extra_blot
+                    glyph_start.0 + x + extra_blot,
+                    glyph_start.1 + y + extra_blot,
                 );
 
+                // TODO: blot in a hollow circle instead of a full square
                 for pixel_loc_x in blot_start.0..=blot_end.0 {
                     for pixel_loc_y in blot_start.1..=blot_end.1 {
-                        if let Some(current_pixel) = text_canvas.get_pixel_checked(
-                            pixel_loc_x,
-                            pixel_loc_y
-                        ) {
+                        if let Some(current_pixel) =
+                            text_canvas.get_pixel_checked(pixel_loc_x, pixel_loc_y)
+                        {
                             let current_mask = current_pixel[3];
                             let new_mask = max(current_mask, *mask);
                             text_canvas.put_pixel(
@@ -289,7 +286,7 @@ fn blend_layer_on_image(
     for x in 0..text_canvas.width() {
         for y in 0..text_canvas.height() {
             // Get canvas data
-            let overlay_pixel = text_canvas.get_pixel(x, y);
+            let overlay_pixel = text_canvas.get_pixel_checked(x, y).unwrap();
             let overlay_alpha = f32::from(overlay_pixel.0[3]) / 255.0;
 
             // Skip if nothing to write
@@ -377,14 +374,8 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     // Generate & add shadow layer
     if let Some(shadow_color) = text_field.shadow_color {
         let shadow_offset = (text_size * 0.06) as i64;
-        let shadow_canvas = generate_text_canvas(
-            &layout,
-            font,
-            field_width,
-            field_height,
-            shadow_color,
-            0,
-        );
+        let shadow_canvas =
+            generate_text_canvas(&layout, font, field_width, field_height, shadow_color, 0);
         blend_layer_on_image(
             &mut image,
             &shadow_canvas,
@@ -653,7 +644,7 @@ mod tests {
     }
 
     #[actix_web::test]
-    async fn test_template_pikachu_fulltext() {
+    async fn test_template_pikachu_lorem() {
         let templates = load_templates();
         let app = test::init_service(
             App::new()
@@ -666,9 +657,7 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        let req = test::TestRequest::default()
-            .uri("/pikachu/f/test")
-            .to_request();
+        let req = test::TestRequest::default().uri("/pikachu/l").to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
     }
