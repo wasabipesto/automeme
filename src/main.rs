@@ -66,8 +66,10 @@ struct TextField {
     text_size: f32,
     /// Color of the text in RGB
     text_color: [u8; 3],
-    /// Color of the text border in RGB
-    border_color: [u8; 3],
+    /// Color of the text border in RGB (optional)
+    border_color: Option<[u8; 3]>,
+    /// Color of the text shadow in RGB (optional)
+    shadow_color: Option<[u8; 3]>,
 }
 
 /// Load all resources necessary for server startup and check that all
@@ -199,6 +201,7 @@ fn regex_text_fields(
 
 /// Create a transparent image layer with the rendered text.
 #[allow(clippy::cast_sign_loss)]
+#[allow(clippy::cast_precision_loss)]
 #[allow(clippy::cast_possible_truncation)]
 fn generate_text_canvas(
     layout: &Layout,
@@ -310,6 +313,7 @@ fn blend_layer_on_image(
 
 /// Renders text onto an image for one field.
 #[allow(clippy::cast_precision_loss)]
+#[allow(clippy::cast_possible_truncation)]
 fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
     // Get field width & height
     let field_width = text_field.end[0] - text_field.start[0];
@@ -347,39 +351,41 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     }
 
     // Add shadow layer
-    let shadow_offset = (text_size * 0.06) as i64;
-    let shadow_canvas = generate_text_canvas(
-        &layout,
-        font,
-        field_width,
-        field_height,
-        text_field.border_color,
-        1.0,
-    );
-    blend_layer_on_image(
-        &mut image,
-        &shadow_canvas,
-        (text_field.start[0], text_field.start[1]),
-        (shadow_offset, shadow_offset),
-    );
+    if let Some(shadow_color) = text_field.shadow_color {
+        let shadow_offset = (text_size * 0.06) as i64;
+        let shadow_canvas = generate_text_canvas(
+            &layout,
+            font,
+            field_width,
+            field_height,
+            shadow_color,
+            1.0,
+        );
+        blend_layer_on_image(
+            &mut image,
+            &shadow_canvas,
+            (text_field.start[0], text_field.start[1]),
+            (shadow_offset, shadow_offset),
+        );
+    };
 
-    /*
     // Add border layer
-    let border_canvas = generate_text_canvas(
-        &layout,
-        font,
-        field_width,
-        field_height,
-        text_field.border_color,
-        1.1,
-    );
-    blend_layer_on_image(
-        &mut image,
-        &border_canvas,
-        (text_field.start[0], text_field.start[1]),
-        (0, 0),
-    );
-    */
+    if let Some(border_color) = text_field.border_color {
+        let border_canvas = generate_text_canvas(
+            &layout,
+            font,
+            field_width,
+            field_height,
+            border_color,
+            1.0,
+        );
+        blend_layer_on_image(
+            &mut image,
+            &border_canvas,
+            (text_field.start[0], text_field.start[1]),
+            (0, 0),
+        );
+    };
 
     // Add text layer
     let text_canvas = generate_text_canvas(
