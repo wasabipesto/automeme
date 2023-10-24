@@ -10,11 +10,12 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use core::u8;
 use fontdue::layout::{
-    CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle,
+    CoordinateSystem, GlyphRasterConfig, HorizontalAlign, Layout, LayoutSettings, TextStyle,
+    VerticalAlign, WrapStyle,
 };
 use fontdue::{Font, FontSettings};
 use glob::glob;
-use image::{Rgb, RgbImage};
+use image::{Rgb, RgbImage, Rgba, RgbaImage};
 use maud::{html, Markup};
 use rand::seq::IteratorRandom;
 use serde::Deserialize;
@@ -58,9 +59,9 @@ struct TextField {
     /// Whether the text should be forced into uppercase
     uppercase: bool,
     /// Distance from the top-left, in [x, y] pixels, where the text field begins
-    start: [f32; 2],
+    start: [u32; 2],
     /// Distance from the top-left, in [x, y] pixels, where the text field ends
-    end: [f32; 2],
+    end: [u32; 2],
     /// Default size of the text in this field
     text_size: f32,
     /// Color of the text in RGB
@@ -196,31 +197,136 @@ fn regex_text_fields(
         .collect()
 }
 
-/// Generates a layout struct with options from the settings.
-fn get_field_text_layout(text_field: &TextField) -> Layout {
+/// Create a transparent image layer with the rendered text.
+#[allow(clippy::cast_sign_loss)]
+#[allow(clippy::cast_possible_truncation)]
+fn generate_text_canvas(
+    layout: &Layout,
+    font: &Font,
+    width: u32,
+    height: u32,
+    text_color: [u8; 3],
+    scale: f32,
+) -> RgbaImage {
+    // Generate mask canvas
+    let mut text_canvas = RgbaImage::new(width, height);
+
+    // Generate glyph pattern from the lyout
+    for glyph in layout.glyphs() {
+        // Generate pixel layout for each glyph
+        let (metrics, bytes) = font.rasterize_config(GlyphRasterConfig {
+            px: glyph.key.px * scale,
+            ..glyph.key
+        });
+        let glyph_start = (
+            (glyph.x + (1.0 - scale) * (metrics.width / 2) as f32) as u32,
+            (glyph.y + (1.0 - scale) * (metrics.height / 2) as f32) as u32,
+        );
+        let glyph_width = metrics.width as u32;
+
+        // Debug info
+        //println!("{:?}", glyph);
+        //println!("{:?}", metrics);
+
+        // Print pixels to the canvas
+        for x in 0..metrics.width as u32 {
+            for y in 0..metrics.height as u32 {
+                let byte_index = y * glyph_width + x;
+                let mask = bytes
+                    .get(byte_index as usize)
+                    .expect("Failed to get glyph data!");
+
+                let pixel_location = (glyph_start.0 + x, glyph_start.1 + y);
+                text_canvas.put_pixel(
+                    pixel_location.0,
+                    pixel_location.1,
+                    Rgba([text_color[0], text_color[1], text_color[2], *mask]),
+                );
+            }
+        }
+    }
+
+    text_canvas
+}
+
+/// Overlay a text layer with transparency onto the image.
+#[allow(clippy::cast_sign_loss)]
+#[allow(clippy::cast_possible_truncation)]
+fn blend_layer_on_image(
+    image: &mut RgbImage,
+    text_canvas: &RgbaImage,
+    start_pos: (u32, u32),
+    offset: (i64, i64),
+) {
+    // Check bounds fit on image
+    if i64::from(start_pos.0) + offset.0 < 0
+        || i64::from(start_pos.0) + offset.0 + i64::from(text_canvas.width())
+            > i64::from(image.width())
+        || i64::from(start_pos.1) + offset.1 < 0
+        || i64::from(start_pos.1) + offset.1 + i64::from(text_canvas.height())
+            > i64::from(image.height())
+    {
+        panic!("Text field exceeds image bounds!")
+    }
+
+    // Iterate over canvas size
+    for x in 0..text_canvas.width() {
+        for y in 0..text_canvas.height() {
+            // Get canvas data
+            let overlay_pixel = text_canvas.get_pixel(x, y);
+            let overlay_alpha = f32::from(overlay_pixel.0[3]) / 255.0;
+
+            // Skip of nothing to write
+            if overlay_alpha == 0.0 {
+                continue;
+            }
+
+            // Get background data
+            let bg_pixel_loc = (
+                (i64::from(x) + i64::from(start_pos.0) + offset.0) as u32,
+                (i64::from(y) + i64::from(start_pos.1) + offset.1) as u32,
+            );
+            let bg_pixel = image.get_pixel(bg_pixel_loc.0, bg_pixel_loc.1);
+
+            // Blend the colors
+            let blended_pixel = Rgb([
+                ((1.0 - overlay_alpha) * f32::from(bg_pixel.0[0])
+                    + overlay_alpha * f32::from(overlay_pixel.0[0])) as u8,
+                ((1.0 - overlay_alpha) * f32::from(bg_pixel.0[1])
+                    + overlay_alpha * f32::from(overlay_pixel.0[0])) as u8,
+                ((1.0 - overlay_alpha) * f32::from(bg_pixel.0[2])
+                    + overlay_alpha * f32::from(overlay_pixel.0[2])) as u8,
+            ]);
+
+            // Save to image
+            image.put_pixel(
+                x + start_pos.0 + offset.0 as u32,
+                y + start_pos.1 + offset.1 as u32,
+                blended_pixel,
+            );
+        }
+    }
+}
+
+/// Renders text onto an image for one field.
+#[allow(clippy::cast_precision_loss)]
+fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
+    // Get field width & height
+    let field_width = text_field.end[0] - text_field.start[0];
+    let field_height = text_field.end[1] - text_field.start[1];
+
+    // Generate a text field layout object
     let mut layout = Layout::new(CoordinateSystem::PositiveYDown);
     layout.reset(&LayoutSettings {
-        x: text_field.start[0],
-        y: text_field.start[1],
-        max_height: Some(text_field.end[1] - text_field.start[1]),
-        max_width: Some(text_field.end[0] - text_field.start[0]),
+        x: 0.0,
+        y: 0.0,
+        max_height: Some(field_height as f32),
+        max_width: Some(field_width as f32),
         horizontal_align: HorizontalAlign::Center,
         vertical_align: VerticalAlign::Middle,
         wrap_style: WrapStyle::Word,
         ..Default::default()
     });
-    layout
-}
-
-/// Renders text onto an image for one field.
-#[allow(clippy::cast_sign_loss)]
-#[allow(clippy::cast_possible_truncation)]
-fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
-    let mut layout = get_field_text_layout(text_field);
-
-    // Set interior & border color
-    let pixel_interior: Rgb<u8> = Rgb(text_field.text_color);
-    let pixel_border: Rgb<u8> = Rgb(text_field.border_color);
 
     // Optionally convert to uppercase
     let text = if text_field.uppercase {
@@ -234,32 +340,62 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     layout.append(&[font], &TextStyle::new(&text, text_size, 0));
 
     // Shrink text to fit the field if necessary
-    while layout.height() > layout.settings().max_height.expect("No max_height!") {
+    while layout.height() > field_height as f32 {
         text_size -= 1.0;
         layout.clear();
         layout.append(&[font], &TextStyle::new(&text, text_size, 0));
     }
 
-    // Generate glyph pattern from the lyout
-    for glyph in layout.glyphs() {
-        // Generate pixel layout for each glyph
-        let (metrics, bytes) = font.rasterize_config(glyph.key);
+    // Add shadow layer
+    let shadow_offset = (text_size * 0.06) as i64;
+    let shadow_canvas = generate_text_canvas(
+        &layout,
+        font,
+        field_width,
+        field_height,
+        text_field.border_color,
+        1.0,
+    );
+    blend_layer_on_image(
+        &mut image,
+        &shadow_canvas,
+        (text_field.start[0], text_field.start[1]),
+        (shadow_offset, shadow_offset),
+    );
 
-        // Print pixels to the image canvas
-        for x in 0..metrics.width {
-            for y in 0..metrics.height {
-                let byte_index = y * glyph.width + x;
-                let x = glyph.x as u32 + x as u32;
-                let y = glyph.y as u32 + y as u32;
-                match bytes.get(byte_index) {
-                    Some(255) => image.put_pixel(x, y, pixel_interior),
-                    Some(0) => (),
-                    Some(_) => image.put_pixel(x, y, pixel_border), // very hacky border fix
-                    None => panic!("Failed to get byte index"),
-                }
-            }
-        }
-    }
+    /*
+    // Add border layer
+    let border_canvas = generate_text_canvas(
+        &layout,
+        font,
+        field_width,
+        field_height,
+        text_field.border_color,
+        1.1,
+    );
+    blend_layer_on_image(
+        &mut image,
+        &border_canvas,
+        (text_field.start[0], text_field.start[1]),
+        (0, 0),
+    );
+    */
+
+    // Add text layer
+    let text_canvas = generate_text_canvas(
+        &layout,
+        font,
+        field_width,
+        field_height,
+        text_field.text_color,
+        1.0,
+    );
+    blend_layer_on_image(
+        &mut image,
+        &text_canvas,
+        (text_field.start[0], text_field.start[1]),
+        (0, 0),
+    );
 
     image
 }
