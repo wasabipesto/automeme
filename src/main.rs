@@ -214,22 +214,16 @@ fn generate_text_canvas(
     // Generate mask canvas
     let mut text_canvas = RgbaImage::new(width, height);
 
-    // Generate glyph pattern from the lyout
+    // Generate glyph pattern from the layout
     for glyph in layout.glyphs() {
         // Generate pixel layout for each glyph
-        let (metrics, bytes) = font.rasterize_config(GlyphRasterConfig {
-            px: glyph.key.px * scale,
-            ..glyph.key
-        });
-        let glyph_start = (
-            (glyph.x + (1.0 - scale) * (metrics.width / 2) as f32) as u32,
-            (glyph.y + (1.0 - scale) * (metrics.height / 2) as f32) as u32,
-        );
+        let (metrics, bytes) = font.rasterize_config(glyph.key);
+        let glyph_start = (glyph.x as u32, glyph.y as u32);
         let glyph_width = metrics.width as u32;
 
         // Debug info
-        //println!("{:?}", glyph);
-        //println!("{:?}", metrics);
+        println!("{:?}", glyph);
+        println!("{:?}", metrics);
 
         // Print pixels to the canvas
         for x in 0..metrics.width as u32 {
@@ -240,16 +234,71 @@ fn generate_text_canvas(
                     .expect("Failed to get glyph data!");
 
                 let pixel_location = (glyph_start.0 + x, glyph_start.1 + y);
-                text_canvas.put_pixel(
-                    pixel_location.0,
-                    pixel_location.1,
-                    Rgba([text_color[0], text_color[1], text_color[2], *mask]),
-                );
+                if pixel_location.0 > width || pixel_location.1 > height {
+                    println!("Pixel {:?} out of bounds!", pixel_location);
+                } else {
+                    text_canvas.put_pixel(
+                        pixel_location.0,
+                        pixel_location.1,
+                        Rgba([text_color[0], text_color[1], text_color[2], *mask]),
+                    );
+                }
             }
         }
     }
 
     text_canvas
+}
+
+/// Create a border layer from the text layer.
+fn generate_border_layer(
+    layout: &Layout,
+    text_canvas: &RgbaImage,
+    border_color: [u8; 3],
+    kernel_size: u32,
+) -> RgbaImage {
+    // Generate mask canvas
+    let mut border_canvas = RgbaImage::new(text_canvas.width(), text_canvas.height());
+
+    // Iterate over text canvas
+    for x in 0..text_canvas.width() {
+        for y in 0..text_canvas.height() {
+            // Create mask as u8 to clamp it to 255
+            let mut mask: u8 = 0;
+            // Get select pixels in kernel view
+            let xmin = x.saturating_sub(kernel_size);
+            let ymin = y.saturating_sub(kernel_size);
+            let xmax = x + kernel_size;
+            let ymax = y + kernel_size;
+            // This is a bit of a hack to reduce number of pixels from scaling exponentially
+            let kernel_points = [
+                (xmin, ymin),
+                (x, ymin),
+                (xmax, ymin),
+                (xmax, y),
+                (xmax, ymax),
+                (x, ymax),
+                (xmin, ymax),
+                (xmin, y),
+            ];
+            for (kernel_x, kernel_y) in kernel_points {
+                let pixel_opt = text_canvas.get_pixel_checked(kernel_x, kernel_y);
+                if let Some(pixel) = pixel_opt {
+                    // Add to the mask value but keep clamped
+                    mask = mask.saturating_add(pixel[3]);
+                }
+            }
+
+            // Save to image
+            border_canvas.put_pixel(
+                x,
+                y,
+                Rgba([border_color[0], border_color[1], border_color[2], mask]),
+            );
+        }
+    }
+
+    border_canvas
 }
 
 /// Overlay a text layer with transparency onto the image.
@@ -272,14 +321,14 @@ fn blend_layer_on_image(
         panic!("Text field exceeds image bounds!")
     }
 
-    // Iterate over canvas size
+    // Iterate over text canvas
     for x in 0..text_canvas.width() {
         for y in 0..text_canvas.height() {
             // Get canvas data
             let overlay_pixel = text_canvas.get_pixel(x, y);
             let overlay_alpha = f32::from(overlay_pixel.0[3]) / 255.0;
 
-            // Skip of nothing to write
+            // Skip if nothing to write
             if overlay_alpha == 0.0 {
                 continue;
             }
@@ -296,7 +345,7 @@ fn blend_layer_on_image(
                 ((1.0 - overlay_alpha) * f32::from(bg_pixel.0[0])
                     + overlay_alpha * f32::from(overlay_pixel.0[0])) as u8,
                 ((1.0 - overlay_alpha) * f32::from(bg_pixel.0[1])
-                    + overlay_alpha * f32::from(overlay_pixel.0[0])) as u8,
+                    + overlay_alpha * f32::from(overlay_pixel.0[1])) as u8,
                 ((1.0 - overlay_alpha) * f32::from(bg_pixel.0[2])
                     + overlay_alpha * f32::from(overlay_pixel.0[2])) as u8,
             ]);
@@ -350,7 +399,17 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         layout.append(&[font], &TextStyle::new(&text, text_size, 0));
     }
 
-    // Add shadow layer
+    // Generate text layer
+    let text_canvas = generate_text_canvas(
+        &layout,
+        font,
+        field_width,
+        field_height,
+        text_field.text_color,
+        1.0,
+    );
+
+    // Generate & add shadow layer
     if let Some(shadow_color) = text_field.shadow_color {
         let shadow_offset = (text_size * 0.06) as i64;
         let shadow_canvas = generate_text_canvas(
@@ -369,15 +428,14 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         );
     };
 
-    // Add border layer
+    // Generate & add border layer
     if let Some(border_color) = text_field.border_color {
-        let border_canvas = generate_text_canvas(
+        let kernel_size = (text_size * 0.05) as u32;
+        let border_canvas = generate_border_layer(
             &layout,
-            font,
-            field_width,
-            field_height,
+            &text_canvas,
             border_color,
-            1.0,
+            kernel_size
         );
         blend_layer_on_image(
             &mut image,
@@ -388,14 +446,6 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
     };
 
     // Add text layer
-    let text_canvas = generate_text_canvas(
-        &layout,
-        font,
-        field_width,
-        field_height,
-        text_field.text_color,
-        1.0,
-    );
     blend_layer_on_image(
         &mut image,
         &text_canvas,
