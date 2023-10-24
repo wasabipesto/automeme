@@ -9,16 +9,14 @@
             "start": [165, 100],
             "end": [600, 450],
             "text_size": 100,
-            "text_color": [0, 0, 0],
-            "border_color": [0, 0, 0]
+            "text_color": [0, 0, 0]
         },{
             "text": "",
             "uppercase": false,
             "start": [815, 175],
             "end": [1350, 550],
             "text_size": 100,
-            "text_color": [0, 0, 0],
-            "border_color": [0, 0, 0]
+            "text_color": [0, 0, 0]
         },{
             "text": "",
             "uppercase": true,

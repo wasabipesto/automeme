@@ -9,16 +9,14 @@
             "start": [425, 200],
             "end": [700, 600],
             "text_size": 75,
-            "text_color": [255, 255, 255],
-            "border_color": [255, 255, 255]
+            "text_color": [255, 255, 255]
         },{
             "text": "",
             "uppercase": false,
             "start": [750, 200],
             "end": [1025, 600],
             "text_size": 75,
-            "text_color": [255, 255, 255],
-            "border_color": [255, 255, 255]
+            "text_color": [255, 255, 255]
         }
     ]
 }

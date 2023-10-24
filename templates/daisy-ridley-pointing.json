@@ -9,8 +9,7 @@
             "start": [900, 110],
             "end": [1750, 730],
             "text_size": 100,
-            "text_color": [0, 0, 0],
-            "border_color": [0, 0, 0]
+            "text_color": [0, 0, 0]
         }
     ]
 }
