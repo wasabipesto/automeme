@@ -648,6 +648,27 @@ mod tests {
     }
 
     #[actix_web::test]
+    async fn test_template_pikachu_fulltext() {
+        let templates = load_templates();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .service(template_index)
+                .service(template_index_lorem)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_lorem)
+                .service(template_sed),
+        )
+        .await;
+        let req = test::TestRequest::default()
+            .uri("/pikachu/f/a")
+            .to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+    }
+
+    #[actix_web::test]
     async fn test_template_pikachu_lorem() {
         let templates = load_templates();
         let app = test::init_service(
@@ -664,5 +685,77 @@ mod tests {
         let req = test::TestRequest::default().uri("/pikachu/l").to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
+    }
+
+    #[actix_web::test]
+    #[ignore]
+    async fn test_templates_all_default() {
+        let templates = load_templates();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .service(template_index)
+                .service(template_index_lorem)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_lorem)
+                .service(template_sed),
+        )
+        .await;
+        for template_name in templates.keys() {
+            let req = test::TestRequest::default()
+                .uri(&("/".to_owned() + template_name))
+                .to_request();
+            let resp = test::call_service(&app, req).await;
+            assert!(resp.status().is_success());
+        }
+    }
+
+    #[actix_web::test]
+    #[ignore]
+    async fn test_templates_all_fulltext() {
+        let templates = load_templates();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .service(template_index)
+                .service(template_index_lorem)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_lorem)
+                .service(template_sed),
+        )
+        .await;
+        for template_name in templates.keys() {
+            let req = test::TestRequest::default()
+                .uri(&("/".to_owned() + template_name + "/f/a"))
+                .to_request();
+            let resp = test::call_service(&app, req).await;
+            assert!(resp.status().is_success());
+        }
+    }
+
+    #[actix_web::test]
+    #[ignore]
+    async fn test_templates_all_lorem() {
+        let templates = load_templates();
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(templates.clone()))
+                .service(template_index)
+                .service(template_index_lorem)
+                .service(template_default)
+                .service(template_fulltext)
+                .service(template_lorem)
+                .service(template_sed),
+        )
+        .await;
+        for template_name in templates.keys() {
+            let req = test::TestRequest::default()
+                .uri(&("/".to_owned() + template_name + "/l"))
+                .to_request();
+            let resp = test::call_service(&app, req).await;
+            assert!(resp.status().is_success());
+        }
     }
 }
