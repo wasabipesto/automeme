@@ -99,7 +99,6 @@ pub fn load_templates() -> HashMap<String, Template> {
         );
     }
 
-    //println!("Loaded {} templates.", templates.len());
     templates
 }
 
@@ -139,8 +138,6 @@ pub fn get_template_data(
     template_name: String,
     templates: &HashMap<String, Template>,
 ) -> Option<TemplateFull> {
-    println!("Serving template {}", &template_name);
-
     // Special case - random
     if template_name == "random" {
         let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
@@ -208,8 +205,6 @@ pub fn generate_text_canvas(
                             blot_point.1,
                             Rgba([text_color[0], text_color[1], text_color[2], new_mask]),
                         );
-                    } else {
-                        println!("Pixel ({},{}) out of bounds!", blot_point.0, blot_point.1);
                     }
                 }
             }

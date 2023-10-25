@@ -137,6 +137,7 @@ async fn template_default(
     templates: web::Data<HashMap<String, Template>>,
 ) -> impl Responder {
     let template_name = path.into_inner();
+    println!("Serving template {}", &template_name);
     match get_template_data(template_name, &templates) {
         Some(template) => {
             let mut image = template.image;
@@ -156,6 +157,7 @@ async fn template_fulltext(
     templates: web::Data<HashMap<String, Template>>,
 ) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
+    println!("Serving template {}", &template_name);
     match get_template_data(template_name, &templates) {
         Some(template) => {
             let mut image = template.image;
@@ -179,6 +181,7 @@ async fn template_lorem(
     templates: web::Data<HashMap<String, Template>>,
 ) -> impl Responder {
     let template_name = path.into_inner();
+    println!("Serving template {}", &template_name);
     match get_template_data(template_name, &templates) {
         Some(template) => {
             let mut image = template.image;
@@ -200,6 +203,7 @@ async fn template_sed(
     templates: web::Data<HashMap<String, Template>>,
 ) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
+    println!("Serving template {}", &template_name);
     match get_template_data(template_name, &templates) {
         Some(template) => {
             let mut image = template.image;
@@ -222,6 +226,7 @@ async fn template_sed(
 async fn main() -> Result<()> {
     // Start the server
     let templates = load_templates();
+    println!("Loaded {} templates.", templates.len());
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(templates.clone()))
