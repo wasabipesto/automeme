@@ -21,6 +21,7 @@ use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
+use std::f32::consts::PI;
 use std::fs::{metadata, File};
 use std::io::{Cursor, Read, Result, Seek, SeekFrom};
 
@@ -200,6 +201,7 @@ fn regex_text_fields(
 /// Create a transparent image layer with the rendered text.
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_precision_loss)]
+#[allow(clippy::cast_possible_wrap)]
 #[allow(clippy::cast_possible_truncation)]
 fn generate_text_canvas(
     layout: &Layout,
@@ -207,52 +209,54 @@ fn generate_text_canvas(
     width: u32,
     height: u32,
     text_color: [u8; 3],
-    extra_blot: u32,
+    blot_radius: f32,
 ) -> RgbaImage {
     // Generate mask canvas
     let mut text_canvas = RgbaImage::new(width, height);
+
+    // Generate blot pattern
+    let mut blot_pattern = Vec::new();
+    for theta in 0..360 {
+        let theta_rad = theta as f32 * PI / 180.0;
+        let point = (
+            (blot_radius * theta_rad.cos()) as i64,
+            (blot_radius * theta_rad.sin()) as i64,
+        );
+        if !blot_pattern.contains(&point) {
+            blot_pattern.push(point);
+        }
+    }
 
     // Generate glyph pattern from the layout
     for glyph in layout.glyphs() {
         // Generate pixel layout for each glyph
         let (metrics, bytes) = font.rasterize_config(glyph.key);
-        let glyph_start = (glyph.x as u32, glyph.y as u32);
 
         // Print pixels to the canvas
-        for x in 0..metrics.width as u32 {
-            for y in 0..metrics.height as u32 {
+        for x in 0..metrics.width {
+            for y in 0..metrics.height {
                 // Get coverage data from rasterization
-                let byte_index = y * metrics.width as u32 + x;
-                let mask = bytes
-                    .get(byte_index as usize)
-                    .expect("Failed to get glyph data!");
+                let byte_index = y * metrics.width + x;
+                let mask = bytes.get(byte_index).expect("Failed to get glyph data!");
 
-                // Determine where to blot pixels
-                let blot_start = (
-                    glyph_start.0 + x - extra_blot,
-                    glyph_start.1 + y - extra_blot,
-                );
-                let blot_end = (
-                    glyph_start.0 + x + extra_blot,
-                    glyph_start.1 + y + extra_blot,
-                );
-
-                // TODO: blot in a hollow circle instead of a full square
-                for pixel_loc_x in blot_start.0..=blot_end.0 {
-                    for pixel_loc_y in blot_start.1..=blot_end.1 {
-                        if let Some(current_pixel) =
-                            text_canvas.get_pixel_checked(pixel_loc_x, pixel_loc_y)
-                        {
-                            let current_mask = current_pixel[3];
-                            let new_mask = max(current_mask, *mask);
-                            text_canvas.put_pixel(
-                                pixel_loc_x,
-                                pixel_loc_y,
-                                Rgba([text_color[0], text_color[1], text_color[2], new_mask]),
-                            );
-                        } else {
-                            println!("Pixel ({pixel_loc_x},{pixel_loc_y}) out of bounds!");
-                        }
+                // Blot pixels around the rendered pixel
+                for blot_pattern_point in &blot_pattern {
+                    let blot_point = (
+                        (glyph.x as i64 + x as i64 + blot_pattern_point.0) as u32,
+                        (glyph.y as i64 + y as i64 + blot_pattern_point.1) as u32,
+                    );
+                    if let Some(current_pixel) =
+                        text_canvas.get_pixel_checked(blot_point.0, blot_point.1)
+                    {
+                        let current_mask = current_pixel[3];
+                        let new_mask = max(current_mask, *mask);
+                        text_canvas.put_pixel(
+                            blot_point.0,
+                            blot_point.1,
+                            Rgba([text_color[0], text_color[1], text_color[2], new_mask]),
+                        );
+                    } else {
+                        println!("Pixel ({},{}) out of bounds!", blot_point.0, blot_point.1);
                     }
                 }
             }
@@ -368,14 +372,14 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
         field_width,
         field_height,
         text_field.text_color,
-        0,
+        0.0,
     );
 
     // Generate & add shadow layer
     if let Some(shadow_color) = text_field.shadow_color {
         let shadow_offset = (text_size * 0.06) as i64;
         let shadow_canvas =
-            generate_text_canvas(&layout, font, field_width, field_height, shadow_color, 0);
+            generate_text_canvas(&layout, font, field_width, field_height, shadow_color, 0.0);
         blend_layer_on_image(
             &mut image,
             &shadow_canvas,
@@ -386,7 +390,7 @@ fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -
 
     // Generate & add border layer
     if let Some(border_color) = text_field.border_color {
-        let border_size = (text_size * 0.03) as u32;
+        let border_size = text_size * 0.03;
         let border_canvas = generate_text_canvas(
             &layout,
             font,
