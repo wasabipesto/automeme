@@ -72,8 +72,6 @@ pub struct TextField {
 /// Load all resources necessary for server startup and check that all
 /// referenced files exist.
 pub fn load_templates() -> HashMap<String, Template> {
-    println!("Server starting...");
-
     // Load and deserialize all JSON files in the templates directory.
     let templates: HashMap<String, Template> = glob("templates/*.json")
         .expect("Failed to resolve glob pattern")
@@ -101,7 +99,7 @@ pub fn load_templates() -> HashMap<String, Template> {
         );
     }
 
-    println!("Loaded {} templates.", templates.len());
+    //println!("Loaded {} templates.", templates.len());
     templates
 }
 
