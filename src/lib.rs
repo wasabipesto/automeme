@@ -27,7 +27,7 @@ const FONT_GEOMETRY_SCALE: f32 = 60.0;
 /// Data from the JSON template files. At startup these are loaded in and then the
 /// image and font paths are checked and loaded as well.
 #[derive(Debug, Deserialize, Clone)]
-pub struct Template {
+pub struct TemplateJSON {
     /// The name of the template as referenced in urls and lookup keys
     pub template_name: String,
     /// The relative path of the base image from the project root, also used as a lookup key
@@ -40,7 +40,7 @@ pub struct Template {
 
 /// The full version of the template with loaded data.
 #[derive(Debug, Clone)]
-pub struct TemplateFull {
+pub struct Template {
     // template_name: String,
     pub image: RgbImage,
     pub font: Font,
@@ -71,15 +71,15 @@ pub struct TextField {
 
 /// Load all resources necessary for server startup and check that all
 /// referenced files exist.
-pub fn load_templates() -> HashMap<String, Template> {
+pub fn load_templates() -> HashMap<String, TemplateJSON> {
     // Load and deserialize all JSON files in the templates directory.
-    let templates: HashMap<String, Template> = glob("templates/*.json")
+    let templates: HashMap<String, TemplateJSON> = glob("templates/*.json")
         .expect("Failed to resolve glob pattern")
         .filter_map(std::result::Result::ok)
         .map(|file_path| {
             let json_content =
                 std::fs::read_to_string(file_path).expect("Failed to read JSON file");
-            let template: Template =
+            let template: TemplateJSON =
                 serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
             (template.template_name.clone(), template)
         })
@@ -105,8 +105,8 @@ pub fn load_templates() -> HashMap<String, Template> {
 /// Given a Template, return a tuple of that Template plus the associated image
 /// and font data. Panics if the image or font could not be found since they
 /// should have been checked at startup.
-pub fn get_template_resources(template: &Template) -> TemplateFull {
-    TemplateFull {
+pub fn get_template_resources(template: &TemplateJSON) -> Template {
+    Template {
         //template_name: template.template_name.clone(),
         image: match image::open(&template.image_path) {
             Ok(image) => image.to_rgb8(),
@@ -136,8 +136,8 @@ pub fn get_template_resources(template: &Template) -> TemplateFull {
 /// was not found. Returns a random template if "random" is used.
 pub fn get_template_data(
     template_name: String,
-    templates: &HashMap<String, Template>,
-) -> Option<TemplateFull> {
+    templates: &HashMap<String, TemplateJSON>,
+) -> Option<Template> {
     // Special case - random
     if template_name == "random" {
         let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();

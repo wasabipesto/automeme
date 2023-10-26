@@ -2,7 +2,7 @@
 //! This is the HTTP server portion of the crate.
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use automeme::{add_text_to_image, get_template_data, load_templates, Template, TextField};
+use automeme::{add_text_to_image, get_template_data, load_templates, TemplateJSON, TextField};
 use image::RgbImage;
 use maud::{html, Markup};
 use std::collections::HashMap;
@@ -69,7 +69,7 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
 
 /// Index of all templates with a little help text.
 #[get("/")]
-async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
+async fn template_index(templates: web::Data<HashMap<String, TemplateJSON>>) -> Result<Markup> {
     Ok(html! {
         html {
             head {
@@ -105,7 +105,9 @@ async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Resu
 
 /// Renders all templates with lorem ipsum text for bounds testing.
 #[get("/lorem")]
-async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
+async fn template_index_lorem(
+    templates: web::Data<HashMap<String, TemplateJSON>>,
+) -> Result<Markup> {
     Ok(html! {
         html {
             head {
@@ -134,7 +136,7 @@ async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -
 #[get("/{template_name}")]
 async fn template_default(
     path: web::Path<String>,
-    templates: web::Data<HashMap<String, Template>>,
+    templates: web::Data<HashMap<String, TemplateJSON>>,
 ) -> impl Responder {
     let template_name = path.into_inner();
     println!("Serving template {}", &template_name);
@@ -154,7 +156,7 @@ async fn template_default(
 #[get("/{template_name}/f/{full_text}")]
 async fn template_fulltext(
     path: web::Path<(String, String)>,
-    templates: web::Data<HashMap<String, Template>>,
+    templates: web::Data<HashMap<String, TemplateJSON>>,
 ) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
     println!("Serving template {}", &template_name);
@@ -178,7 +180,7 @@ async fn template_fulltext(
 #[get("/{template_name}/l")]
 async fn template_lorem(
     path: web::Path<String>,
-    templates: web::Data<HashMap<String, Template>>,
+    templates: web::Data<HashMap<String, TemplateJSON>>,
 ) -> impl Responder {
     let template_name = path.into_inner();
     println!("Serving template {}", &template_name);
@@ -200,7 +202,7 @@ async fn template_lorem(
 #[get("/{template_name}/s/{old_text}/{new_text}")]
 async fn template_sed(
     path: web::Path<(String, String, String)>,
-    templates: web::Data<HashMap<String, Template>>,
+    templates: web::Data<HashMap<String, TemplateJSON>>,
 ) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
     println!("Serving template {}", &template_name);
