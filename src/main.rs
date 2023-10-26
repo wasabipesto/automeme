@@ -2,7 +2,10 @@
 //! This is the HTTP server portion of the crate.
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use automeme::{add_text_to_image, get_template_data, load_templates, TemplateJSON, TextField};
+use automeme::{
+    add_text_to_image, get_template_data, get_template_names, startup_check_all_resources,
+    TextField,
+};
 use image::RgbImage;
 use maud::{html, Markup};
 use std::collections::HashMap;
@@ -69,7 +72,8 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
 
 /// Index of all templates with a little help text.
 #[get("/")]
-async fn template_index(templates: web::Data<HashMap<String, TemplateJSON>>) -> Result<Markup> {
+async fn template_index() -> Result<Markup> {
+    let template_list = get_template_names();
     Ok(html! {
         html {
             head {
@@ -86,11 +90,11 @@ async fn template_index(templates: web::Data<HashMap<String, TemplateJSON>>) -> 
                 p {
                     "If you want to edit the text of a meme, or add text to a meme with no default text, you can use the " strong { "/f" } " or " strong { "/s" } " options. The " strong { "/f " } " option allows you to overwrite the text of a meme to your own, like adding \"mfw code doesn't compile\" to the surprised pikachu template. To do this, take the default image path like " a href="pikachu" { "/pikachu" } " and add /f/{your-text} to make " a href="pikachu/f/mfw-code-doesn't-compile" { "/pikachu/f/mfw-code-doesn't-compile" } ". The " strong { "/s" } " option replaces existing text in the template to your own with the pattern /s/{old-text}/{new-text}, allowing you to quickly turn \"Wouldn't you like to know, weather boy?\" into " a href="weatherboy/s/weather-boy/type-checker" { "\"Wouldn't you like to know, type checker?\"" } " For memes with multiple fields, use | to move to the next field. Spaces are substituted from both - and _."
                 }
-                @for template in templates.values() {
-                    a href=(template.template_name) {
+                @for template_name in template_list {
+                    a href=(template_name) {
                         img
-                            src=(template.template_name)
-                            title=(template.template_name)
+                            src=(template_name)
+                            title=(template_name)
                             style="max-height:250px; max-width:300px; margin:20px;"
                             {}
                     }
@@ -105,9 +109,7 @@ async fn template_index(templates: web::Data<HashMap<String, TemplateJSON>>) -> 
 
 /// Renders all templates with lorem ipsum text for bounds testing.
 #[get("/lorem")]
-async fn template_index_lorem(
-    templates: web::Data<HashMap<String, TemplateJSON>>,
-) -> Result<Markup> {
+async fn template_index_lorem() -> Result<Markup> {
     Ok(html! {
         html {
             head {
@@ -226,12 +228,13 @@ async fn template_sed(
 /// Server startup tasks.
 #[actix_web::main]
 async fn main() -> Result<()> {
+    // Validate resources
+    if startup_check_all_resources().is_err() {
+        panic!("Failed to validate resources");
+    }
     // Start the server
-    let templates = load_templates();
-    println!("Loaded {} templates.", templates.len());
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(templates.clone()))
             .service(template_index)
             .service(template_index_lorem)
             .service(template_default)
@@ -251,10 +254,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_index() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -270,10 +271,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_default() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -289,10 +288,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_fulltext() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -310,10 +307,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_lorem() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -330,10 +325,8 @@ mod tests {
     #[actix_web::test]
     #[ignore]
     async fn test_templates_all_default() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -354,10 +347,8 @@ mod tests {
     #[actix_web::test]
     #[ignore]
     async fn test_templates_all_fulltext() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -378,10 +369,8 @@ mod tests {
     #[actix_web::test]
     #[ignore]
     async fn test_templates_all_lorem() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
