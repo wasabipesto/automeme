@@ -151,7 +151,7 @@ pub fn get_template_from_disk(template_name: &String) -> Result<Option<Template>
 }
 
 /// Load each template file in the templates directory and check all the linked files exist.
-pub fn startup_check_all_resources() -> Result<(), String> {
+pub fn startup_check_all_resources() -> Result<usize, String> {
     // Get list of template names from glob
     let template_names = get_template_names()?;
 
@@ -165,14 +165,14 @@ pub fn startup_check_all_resources() -> Result<(), String> {
         .collect();
 
     // Check all referenced files exist
-    for template in templates_json? {
+    for template in templates_json.clone()? {
         for file_path in [template.image_path, template.font_path] {
             metadata(&file_path)
                 .map_err(|e| format!("Failed to read file {}: {}", file_path, e))?;
         }
     }
 
-    Ok(())
+    Ok(templates_json?.len())
 }
 
 /// Load each template file in the templates directory and load everything into memory.

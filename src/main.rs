@@ -138,9 +138,9 @@ async fn template_index_lorem() -> Result<Markup> {
 #[get("/{template_name}")]
 async fn template_default(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
-    println!("Serving template {}", &template_name);
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
+            println!("Serving template {} as default", &template_name);
             let mut image = template.image;
             for text_field in template.text_fields {
                 image = add_text_to_image(&text_field, image, &template.font);
@@ -155,9 +155,9 @@ async fn template_default(path: web::Path<String>) -> impl Responder {
 #[get("/{template_name}/f/{full_text}")]
 async fn template_fulltext(path: web::Path<(String, String)>) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
-    println!("Serving template {}", &template_name);
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
+            println!("Serving template {} with fulltext", &template_name);
             let mut image = template.image;
             let text_fields = override_text_fields(
                 template.text_fields,
@@ -176,9 +176,9 @@ async fn template_fulltext(path: web::Path<(String, String)>) -> impl Responder 
 #[get("/{template_name}/l")]
 async fn template_lorem(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
-    println!("Serving template {}", &template_name);
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
+            println!("Serving template {} with lorem", &template_name);
             let mut image = template.image;
             let lorem_vec = vec![String::from(LOREM_IPSUM); template.text_fields.len()];
             let text_fields = override_text_fields(template.text_fields, lorem_vec);
@@ -195,9 +195,9 @@ async fn template_lorem(path: web::Path<String>) -> impl Responder {
 #[get("/{template_name}/s/{old_text}/{new_text}")]
 async fn template_sed(path: web::Path<(String, String, String)>) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
-    println!("Serving template {}", &template_name);
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
+            println!("Serving template {} with sed", &template_name);
             let mut image = template.image;
             let text_fields = regex_text_fields(
                 template.text_fields,
@@ -217,7 +217,8 @@ async fn template_sed(path: web::Path<(String, String, String)>) -> impl Respond
 #[actix_web::main]
 async fn main() -> Result<()> {
     // Validate resources
-    startup_check_all_resources().unwrap();
+    let num_templates = startup_check_all_resources().unwrap();
+    println!("Server started: {} templates validated.", num_templates);
     // Start the server
     HttpServer::new(move || {
         App::new()
