@@ -3,8 +3,8 @@
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use automeme::{
-    add_text_to_image, get_template_from_disk, get_template_names, startup_check_all_resources,
-    TextField,
+    get_template_from_disk, get_template_names, render_template, startup_check_all_resources,
+    Template, TextField,
 };
 use image::RgbImage;
 use maud::{html, Markup};
@@ -141,10 +141,7 @@ async fn template_default(path: web::Path<String>) -> impl Responder {
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             println!("Serving template {} as default", &template_name);
-            let mut image = template.image;
-            for text_field in template.text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(template);
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -158,14 +155,14 @@ async fn template_fulltext(path: web::Path<(String, String)>) -> impl Responder 
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             println!("Serving template {} with fulltext", &template_name);
-            let mut image = template.image;
             let text_fields = override_text_fields(
                 template.text_fields,
                 clean_text_to_vec(path_to_clean_text(full_text)),
             );
-            for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(Template {
+                text_fields,
+                ..template
+            });
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -179,12 +176,12 @@ async fn template_lorem(path: web::Path<String>) -> impl Responder {
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             println!("Serving template {} with lorem", &template_name);
-            let mut image = template.image;
             let lorem_vec = vec![String::from(LOREM_IPSUM); template.text_fields.len()];
             let text_fields = override_text_fields(template.text_fields, lorem_vec);
-            for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(Template {
+                text_fields,
+                ..template
+            });
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -198,15 +195,15 @@ async fn template_sed(path: web::Path<(String, String, String)>) -> impl Respond
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             println!("Serving template {} with sed", &template_name);
-            let mut image = template.image;
             let text_fields = regex_text_fields(
                 template.text_fields,
                 path_to_clean_text(old_text),
                 path_to_clean_text(new_text),
             );
-            for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(Template {
+                text_fields,
+                ..template
+            });
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),

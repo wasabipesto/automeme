@@ -197,7 +197,7 @@ pub fn startup_load_all_resources() -> Result<HashMap<String, Template>, String>
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::cast_possible_wrap)]
 #[allow(clippy::cast_possible_truncation)]
-pub fn generate_text_canvas(
+pub fn generate_text_layer(
     layout: &Layout,
     font: &Font,
     width: u32,
@@ -261,7 +261,7 @@ pub fn generate_text_canvas(
 /// Overlay a text layer with transparency onto the image.
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
-pub fn blend_layer_on_image(
+pub fn overlay_layer_on_image(
     image: &mut RgbImage,
     text_canvas: &RgbaImage,
     start_pos: (u32, u32),
@@ -321,7 +321,11 @@ pub fn blend_layer_on_image(
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::cast_possible_truncation)]
-pub fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Font) -> RgbImage {
+fn render_text_field_on_image(
+    text_field: &TextField,
+    mut image: RgbImage,
+    font: &Font,
+) -> RgbImage {
     // Get field width & height
     let field_width = text_field.end[0] - text_field.start[0];
     let field_height = text_field.end[1] - text_field.start[1];
@@ -358,7 +362,7 @@ pub fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Fon
     }
 
     // Generate text layer
-    let text_canvas = generate_text_canvas(
+    let text_canvas = generate_text_layer(
         &layout,
         font,
         field_width,
@@ -371,8 +375,8 @@ pub fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Fon
     if let Some(shadow_color) = text_field.shadow_color {
         let shadow_offset = (text_size * 0.06) as i64;
         let shadow_canvas =
-            generate_text_canvas(&layout, font, field_width, field_height, shadow_color, 0.0);
-        blend_layer_on_image(
+            generate_text_layer(&layout, font, field_width, field_height, shadow_color, 0.0);
+        overlay_layer_on_image(
             &mut image,
             &shadow_canvas,
             (text_field.start[0], text_field.start[1]),
@@ -383,7 +387,7 @@ pub fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Fon
     // Generate & add border layer
     if let Some(border_color) = text_field.border_color {
         let border_size = text_size * 0.03;
-        let border_canvas = generate_text_canvas(
+        let border_canvas = generate_text_layer(
             &layout,
             font,
             field_width,
@@ -391,7 +395,7 @@ pub fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Fon
             border_color,
             border_size,
         );
-        blend_layer_on_image(
+        overlay_layer_on_image(
             &mut image,
             &border_canvas,
             (text_field.start[0], text_field.start[1]),
@@ -400,12 +404,20 @@ pub fn add_text_to_image(text_field: &TextField, mut image: RgbImage, font: &Fon
     };
 
     // Add text layer
-    blend_layer_on_image(
+    overlay_layer_on_image(
         &mut image,
         &text_canvas,
         (text_field.start[0], text_field.start[1]),
         (0, 0),
     );
 
+    image
+}
+
+pub fn render_template(template: Template) -> RgbImage {
+    let mut image = template.image;
+    for text_field in template.text_fields {
+        image = render_text_field_on_image(&text_field, image, &template.font);
+    }
     image
 }
