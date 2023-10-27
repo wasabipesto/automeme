@@ -1,39 +1,23 @@
 //! Benchmarks for the main crate
 
-use automeme::{add_text_to_image, get_template_resources, load_templates};
+use automeme::{
+    get_template_from_disk, get_template_names, startup_check_all_resources,
+    startup_load_all_resources,
+};
 use criterion::{criterion_group, criterion_main, Criterion};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("load all templates from disk", |b| {
-        b.iter(|| load_templates())
+    c.bench_function("get names from template files", |b| {
+        b.iter(|| get_template_names())
     });
-
-    let templates = load_templates();
-    let template = templates.get("weatherboy").unwrap();
-    c.bench_function("load resources from disk for single template", |b| {
-        b.iter(|| get_template_resources(template))
+    c.bench_function("load one template and resources from disk", |b| {
+        b.iter(|| get_template_from_disk(&"weatherboy".to_owned()))
     });
-
-    let template = get_template_resources(template);
-    let image = template.image;
-    c.bench_function("render text in all fields", |b| {
-        b.iter(|| {
-            for text_field in &template.text_fields {
-                add_text_to_image(&text_field, image.clone(), &template.font);
-            }
-        })
+    c.bench_function("load all templates and validate all resources", |b| {
+        b.iter(|| startup_check_all_resources())
     });
-
-    let templates = load_templates();
-    c.bench_function("load and render everything", |b| {
-        b.iter(|| {
-            let template = templates.get("weatherboy").unwrap();
-            let template = get_template_resources(template);
-            let mut image = template.image;
-            for text_field in &template.text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
-        })
+    c.bench_function("load all templates and all resources into memory", |b| {
+        b.iter(|| startup_load_all_resources())
     });
 }
 

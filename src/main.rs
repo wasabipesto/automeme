@@ -3,12 +3,11 @@
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use automeme::{
-    add_text_to_image, get_template_data, get_template_names, startup_check_all_resources,
+    add_text_to_image, get_template_from_disk, get_template_names, startup_check_all_resources,
     TextField,
 };
 use image::RgbImage;
 use maud::{html, Markup};
-use std::collections::HashMap;
 use std::env;
 use std::io::{Cursor, Result, Seek, SeekFrom};
 
@@ -73,7 +72,7 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
 /// Index of all templates with a little help text.
 #[get("/")]
 async fn template_index() -> Result<Markup> {
-    let template_list = get_template_names();
+    let template_list = get_template_names().unwrap();
     Ok(html! {
         html {
             head {
@@ -110,6 +109,7 @@ async fn template_index() -> Result<Markup> {
 /// Renders all templates with lorem ipsum text for bounds testing.
 #[get("/lorem")]
 async fn template_index_lorem() -> Result<Markup> {
+    let template_list = get_template_names().unwrap();
     Ok(html! {
         html {
             head {
@@ -119,12 +119,12 @@ async fn template_index_lorem() -> Result<Markup> {
                 p {
                     a href=("/") { "Back to normal index." }
                 }
-                @for template in templates.values() {
-                    @let path = format!("{}/l", template.template_name);
+                @for template_name in template_list {
+                    @let path = format!("{}/l", template_name);
                     a href=(path) {
                         img
                             src=(path)
-                            title=(template.template_name)
+                            title=(template_name)
                             style="max-height:350px; max-width:400px; margin:20px;"
                             {}
                     }
@@ -136,13 +136,10 @@ async fn template_index_lorem() -> Result<Markup> {
 
 /// Finds a template by name and renders it with default settings.
 #[get("/{template_name}")]
-async fn template_default(
-    path: web::Path<String>,
-    templates: web::Data<HashMap<String, TemplateJSON>>,
-) -> impl Responder {
+async fn template_default(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
     println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             let mut image = template.image;
             for text_field in template.text_fields {
@@ -156,13 +153,10 @@ async fn template_default(
 
 /// Renders a template with entirely user-given text.
 #[get("/{template_name}/f/{full_text}")]
-async fn template_fulltext(
-    path: web::Path<(String, String)>,
-    templates: web::Data<HashMap<String, TemplateJSON>>,
-) -> impl Responder {
+async fn template_fulltext(path: web::Path<(String, String)>) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
     println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             let mut image = template.image;
             let text_fields = override_text_fields(
@@ -180,13 +174,10 @@ async fn template_fulltext(
 
 /// Renders a template with lorem ipsum text.
 #[get("/{template_name}/l")]
-async fn template_lorem(
-    path: web::Path<String>,
-    templates: web::Data<HashMap<String, TemplateJSON>>,
-) -> impl Responder {
+async fn template_lorem(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
     println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             let mut image = template.image;
             let lorem_vec = vec![String::from(LOREM_IPSUM); template.text_fields.len()];
@@ -202,13 +193,10 @@ async fn template_lorem(
 
 /// Renders a template by replacing text via a simple pattern.
 #[get("/{template_name}/s/{old_text}/{new_text}")]
-async fn template_sed(
-    path: web::Path<(String, String, String)>,
-    templates: web::Data<HashMap<String, TemplateJSON>>,
-) -> impl Responder {
+async fn template_sed(path: web::Path<(String, String, String)>) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
     println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
             let mut image = template.image;
             let text_fields = regex_text_fields(
@@ -229,9 +217,7 @@ async fn template_sed(
 #[actix_web::main]
 async fn main() -> Result<()> {
     // Validate resources
-    if startup_check_all_resources().is_err() {
-        panic!("Failed to validate resources");
-    }
+    startup_check_all_resources().unwrap();
     // Start the server
     HttpServer::new(move || {
         App::new()
@@ -335,9 +321,9 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        for template_name in templates.keys() {
+        for template_name in get_template_names().unwrap() {
             let req = test::TestRequest::default()
-                .uri(&("/".to_owned() + template_name))
+                .uri(&format!("/{}", template_name))
                 .to_request();
             let resp = test::call_service(&app, req).await;
             assert!(resp.status().is_success());
@@ -357,9 +343,9 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        for template_name in templates.keys() {
+        for template_name in get_template_names().unwrap() {
             let req = test::TestRequest::default()
-                .uri(&("/".to_owned() + template_name + "/f/a"))
+                .uri(&format!("/{}/f/a", template_name))
                 .to_request();
             let resp = test::call_service(&app, req).await;
             assert!(resp.status().is_success());
@@ -379,9 +365,9 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        for template_name in templates.keys() {
+        for template_name in get_template_names().unwrap() {
             let req = test::TestRequest::default()
-                .uri(&("/".to_owned() + template_name + "/l"))
+                .uri(&format!("/{}/l", template_name))
                 .to_request();
             let resp = test::call_service(&app, req).await;
             assert!(resp.status().is_success());

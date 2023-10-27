@@ -16,11 +16,13 @@ use fontdue::layout::{
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{Rgb, RgbImage, Rgba, RgbaImage};
-use rand::seq::IteratorRandom;
+// use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::f32::consts::PI;
 use std::fs::{metadata, File};
+use std::io::Read;
+use std::path::PathBuf;
 
 const FONT_GEOMETRY_SCALE: f32 = 60.0;
 
@@ -69,54 +71,61 @@ pub struct TextField {
     pub shadow_color: Option<[u8; 3]>,
 }
 
-/// Load all resources necessary for server startup and check that all
-/// referenced files exist.
-pub fn load_templates() -> HashMap<String, TemplateJSON> {
-    // Load and deserialize all JSON files in the templates directory.
-    let templates: HashMap<String, TemplateJSON> = glob("templates/*.json")
-        .expect("Failed to resolve glob pattern")
-        .filter_map(std::result::Result::ok)
-        .map(|file_path| {
-            let json_content =
-                std::fs::read_to_string(file_path).expect("Failed to read JSON file");
-            let template: TemplateJSON =
-                serde_json::from_str(&json_content).expect("Failed to deserialize JSON");
-            (template.template_name.clone(), template)
+/// Get a list of templates based on json filenames.
+pub fn get_template_names() -> Result<Vec<String>, String> {
+    let paths = glob("templates/*.json").map_err(|e| format!("Failed to expand glob: {}", e))?;
+    let names: Result<Vec<String>, _> = paths
+        .map(|path| {
+            let file_path = path.map_err(|e| format!("Failed to read file path: {}", e))?;
+            let file_stem = file_path
+                .file_stem()
+                .ok_or_else(|| "Failed to get file stem")?;
+            let file_str = file_stem
+                .to_str()
+                .ok_or_else(|| "Failed to convert OsStr to string")?;
+            Ok(file_str.to_string())
         })
         .collect();
 
-    // Check all referenced files exist
-    for template in templates.values() {
-        assert!(
-            metadata(&template.image_path).is_ok(),
-            "Could not find file {}",
-            &template.image_path
-        );
-        assert!(
-            metadata(&template.image_path).is_ok(),
-            "Could not find file {}",
-            &template.image_path
-        );
-    }
-
-    templates
+    names
 }
 
-/// Given a Template, return a tuple of that Template plus the associated image
-/// and font data. Panics if the image or font could not be found since they
-/// should have been checked at startup.
-pub fn get_template_resources(template: &TemplateJSON) -> Template {
-    Template {
-        //template_name: template.template_name.clone(),
-        image: match image::open(&template.image_path) {
-            Ok(image) => image.to_rgb8(),
-            Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
-        },
-        font: match File::open(&template.font_path) {
-            Ok(mut font_file) => {
+/// Load a selected json file from the disk.
+fn get_json_from_disk(template_name: &String) -> Result<Option<TemplateJSON>, String> {
+    let file_path = PathBuf::from(format!("templates/{}.json", template_name));
+    if !file_path.exists() {
+        return Ok(None);
+    }
+    let json_string = std::fs::read_to_string(&file_path)
+        .map_err(|e| format!("Failed to read JSON file: {}", e))?;
+    let template_json: TemplateJSON = serde_json::from_str(&json_string)
+        .map_err(|e| format!("Failed to deserialize JSON: {}", e))?;
+
+    Ok(Some(template_json))
+}
+
+/// Load a selected template and all resources from the disk.
+pub fn get_template_from_disk(template_name: &String) -> Result<Option<Template>, String> {
+    if let Some(template_json) = get_json_from_disk(template_name)? {
+        // Successfully located and read the json file
+        // Open and decode the image
+        let image = image::open(&template_json.image_path)
+            .map_err(|e| format!("Failed to open file {}: {}", &template_json.image_path, e))
+            .and_then(|image| Ok(image.to_rgb8()))
+            .map_err(|e| {
+                format!(
+                    "Failed to decode image {}: {}",
+                    &template_json.image_path, e
+                )
+            })?;
+        // Open and decode font
+        let font = File::open(&template_json.font_path)
+            .map_err(|e| format!("Failed to open file {}: {}", &template_json.font_path, e))
+            .and_then(|mut font_file| {
                 let mut font_bytes = Vec::new();
-                std::io::Read::read_to_end(&mut font_file, &mut font_bytes)
-                    .expect("Failed to read font data");
+                font_file
+                    .read_to_end(&mut font_bytes)
+                    .map_err(|e| format!("Failed to read font data: {}", e))?;
                 Font::from_bytes(
                     font_bytes,
                     FontSettings {
@@ -124,28 +133,63 @@ pub fn get_template_resources(template: &TemplateJSON) -> Template {
                         scale: FONT_GEOMETRY_SCALE,
                     },
                 )
-                .expect("Failed to load font data")
-            }
-            Err(e) => panic!("Could not open file {} {}", &template.image_path, e),
-        },
-        text_fields: template.text_fields.clone(),
+                .map_err(|e| format!("Failed to load font data: {}", e))
+            })?;
+        // Get text fields
+        let text_fields = template_json.text_fields;
+
+        // Return the template
+        Ok(Some(Template {
+            image,
+            font,
+            text_fields,
+        }))
+    } else {
+        // Could not find a template by that name
+        Ok(None)
     }
 }
 
-/// Given a template name, get all assciated data. Returns None if the template
-/// was not found. Returns a random template if "random" is used.
-pub fn get_template_data(
-    template_name: String,
-    templates: &HashMap<String, TemplateJSON>,
-) -> Option<Template> {
-    // Special case - random
-    if template_name == "random" {
-        let (_, template) = templates.iter().choose(&mut rand::thread_rng()).unwrap();
-        return Some(get_template_resources(template));
+/// Load each template file in the templates directory and check all the linked files exist.
+pub fn startup_check_all_resources() -> Result<(), String> {
+    // Get list of template names from glob
+    let template_names = get_template_names()?;
+
+    // Load json for each template
+    let templates_json: Result<Vec<TemplateJSON>, String> = template_names
+        .iter()
+        .map(|name| match get_json_from_disk(name)? {
+            Some(template) => Ok(template),
+            None => Err(format!("Error: Template '{}' not found.", name)),
+        })
+        .collect();
+
+    // Check all referenced files exist
+    for template in templates_json? {
+        for file_path in [template.image_path, template.font_path] {
+            metadata(&file_path)
+                .map_err(|e| format!("Failed to read file {}: {}", file_path, e))?;
+        }
     }
 
-    // Find matching template
-    templates.get(&template_name).map(get_template_resources)
+    Ok(())
+}
+
+/// Load each template file in the templates directory and load everything into memory.
+pub fn startup_load_all_resources() -> Result<HashMap<String, Template>, String> {
+    // Get list of template names from glob
+    let template_names = get_template_names()?;
+
+    // Load all resources for each template
+    let templates: Result<HashMap<String, Template>, String> = template_names
+        .iter()
+        .map(|name| match get_template_from_disk(name)? {
+            Some(template) => Ok((name.clone(), template)),
+            None => Err(format!("Error: Template '{}' not found.", name)),
+        })
+        .collect();
+
+    templates
 }
 
 /// Create a transparent image layer with the rendered text.
