@@ -6,7 +6,7 @@ use automeme::{
     get_template_from_disk, get_template_names, render_template, startup_check_all_resources,
     Template, TextField,
 };
-use image::RgbImage;
+use image::RgbaImage;
 use maud::{html, Markup};
 use std::env;
 use std::io::{Cursor, Result, Seek, SeekFrom};
@@ -54,7 +54,7 @@ fn regex_text_fields(
 }
 
 /// Streams the image data to the client and tells them it's a PNG file.
-fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
+fn serve_image_to_client(image: &RgbaImage) -> HttpResponse {
     let mut png_data = Cursor::new(Vec::new());
     image
         .write_to(&mut png_data, image::ImageOutputFormat::Png)
