@@ -7,6 +7,7 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::unused_async)]
 #![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::must_use_candidate)]
 
 use core::u8;
 use fontdue::layout::{
@@ -73,17 +74,21 @@ pub struct TextField {
 }
 
 /// Get a list of templates based on json filenames.
+///
+/// # Errors
+/// Will return Err if:
+/// - the pattern glob cannot be expanded
+/// - any json file in the templates directory has no filename
+/// - any filename cannot be converted to a string
 pub fn get_template_names() -> Result<Vec<String>, String> {
-    let paths = glob("templates/*.json").map_err(|e| format!("Failed to expand glob: {}", e))?;
-    let names: Result<Vec<String>, _> = paths
+    let paths = glob("templates/*.json").map_err(|e| format!("Failed to expand glob: {e}"))?;
+    let names: Result<Vec<String>, String> = paths
         .map(|path| {
-            let file_path = path.map_err(|e| format!("Failed to read file path: {}", e))?;
-            let file_stem = file_path
-                .file_stem()
-                .ok_or_else(|| "Failed to get file stem")?;
+            let file_path = path.map_err(|e| format!("Failed to read file path: {e}"))?;
+            let file_stem = file_path.file_stem().ok_or("Failed to get file stem")?;
             let file_str = file_stem
                 .to_str()
-                .ok_or_else(|| "Failed to convert OsStr to string")?;
+                .ok_or("Failed to convert OsStr to string")?;
             Ok(file_str.to_string())
         })
         .collect();
@@ -91,28 +96,40 @@ pub fn get_template_names() -> Result<Vec<String>, String> {
     names
 }
 
-/// Load a selected json file from the disk.
+/// Load a selected json file from the disk. Returns None if no template by
+/// that name exists.
+///
+/// # Errors
+/// Will return Err if the json string cannot be read from the file or the
+/// struct cannot be deserialized from the json string.
 fn get_json_from_disk(template_name: &String) -> Result<Option<TemplateJSON>, String> {
-    let file_path = PathBuf::from(format!("templates/{}.json", template_name));
+    let file_path = PathBuf::from(format!("templates/{template_name}.json"));
     if !file_path.exists() {
         return Ok(None);
     }
     let json_string = std::fs::read_to_string(&file_path)
-        .map_err(|e| format!("Failed to read JSON file: {}", e))?;
+        .map_err(|e| format!("Failed to read JSON file: {e}"))?;
     let template_json: TemplateJSON = serde_json::from_str(&json_string)
-        .map_err(|e| format!("Failed to deserialize JSON: {}", e))?;
+        .map_err(|e| format!("Failed to deserialize JSON: {e}"))?;
 
     Ok(Some(template_json))
 }
 
-/// Load a selected template and all resources from the disk.
+/// Load a selected template and all resources from the disk. Returns None if
+/// no template by that name exists.
+///
+/// # Errors
+/// Will return Err if:
+/// - `get_json_from_disk` returns Err for the given template name
+/// - Image file cannot be opened or decoded
+/// - Font file cannot be opened, read, or loaded.
 pub fn get_template_from_disk(template_name: &String) -> Result<Option<Template>, String> {
     if let Some(template_json) = get_json_from_disk(template_name)? {
         // Successfully located and read the json file
         // Open and decode the image
         let image = image::open(&template_json.image_path)
             .map_err(|e| format!("Failed to open file {}: {}", &template_json.image_path, e))
-            .and_then(|image| Ok(image.to_rgba8()))
+            .map(|image| image.to_rgba8())
             .map_err(|e| {
                 format!(
                     "Failed to decode image {}: {}",
@@ -126,7 +143,7 @@ pub fn get_template_from_disk(template_name: &String) -> Result<Option<Template>
                 let mut font_bytes = Vec::new();
                 font_file
                     .read_to_end(&mut font_bytes)
-                    .map_err(|e| format!("Failed to read font data: {}", e))?;
+                    .map_err(|e| format!("Failed to read font data: {e}"))?;
                 Font::from_bytes(
                     font_bytes,
                     FontSettings {
@@ -134,7 +151,7 @@ pub fn get_template_from_disk(template_name: &String) -> Result<Option<Template>
                         scale: FONT_GEOMETRY_SCALE,
                     },
                 )
-                .map_err(|e| format!("Failed to load font data: {}", e))
+                .map_err(|e| format!("Failed to load font data: {e}"))
             })?;
         // Get text fields
         let text_fields = template_json.text_fields;
@@ -153,6 +170,12 @@ pub fn get_template_from_disk(template_name: &String) -> Result<Option<Template>
 
 /// Load each template file in the templates directory and check that all of
 /// the referenced files (fonts, images) exist.
+///
+/// # Errors
+/// Will return Err if:
+/// - `get_template_names` returns Err
+/// - `get_template_from_disk` returns Err or None when loading a template by name
+/// - any file referenced by a template does not exist
 pub fn startup_check_all_resources() -> Result<usize, String> {
     // Get list of template names from glob
     let template_names = get_template_names()?;
@@ -162,15 +185,14 @@ pub fn startup_check_all_resources() -> Result<usize, String> {
         .iter()
         .map(|name| match get_json_from_disk(name)? {
             Some(template) => Ok(template),
-            None => Err(format!("Error: Template '{}' not found.", name)),
+            None => Err(format!("Error: Template '{name}' not found.")),
         })
         .collect();
 
     // Check all referenced files exist
     for template in templates_json.clone()? {
         for file_path in [template.image_path, template.font_path] {
-            metadata(&file_path)
-                .map_err(|e| format!("Failed to read file {}: {}", file_path, e))?;
+            metadata(&file_path).map_err(|e| format!("Failed to read file {file_path}: {e}"))?;
         }
     }
 
@@ -178,7 +200,12 @@ pub fn startup_check_all_resources() -> Result<usize, String> {
 }
 
 /// Load each template file in the templates directory and load everything into
-/// a single HashMap for faster lookup.
+/// a single `HashMap` for faster lookup.
+///
+/// # Errors
+/// Will return Err if:
+/// - `get_template_names` returns Err
+/// - `get_template_from_disk` returns Err or None when loading a template by name
 pub fn startup_load_all_resources() -> Result<HashMap<String, Template>, String> {
     // Get list of template names from glob
     let template_names = get_template_names()?;
@@ -188,7 +215,7 @@ pub fn startup_load_all_resources() -> Result<HashMap<String, Template>, String>
         .iter()
         .map(|name| match get_template_from_disk(name)? {
             Some(template) => Ok((name.clone(), template)),
-            None => Err(format!("Error: Template '{}' not found.", name)),
+            None => Err(format!("Error: Template '{name}' not found.")),
         })
         .collect();
 
@@ -196,11 +223,10 @@ pub fn startup_load_all_resources() -> Result<HashMap<String, Template>, String>
 }
 
 /// Create a transparent image layer with the rendered text to be overlayed on
-/// the final image. To generate a border layer, increase the blot_radius to
+/// the final image. To generate a border layer, increase the `blot_radius` to
 /// something greater than 0.
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_precision_loss)]
-#[allow(clippy::cast_possible_wrap)]
 #[allow(clippy::cast_possible_truncation)]
 pub fn generate_text_layer(
     layout: &Layout,
@@ -210,8 +236,8 @@ pub fn generate_text_layer(
 ) -> RgbaImage {
     // Generate mask canvas
     let mut text_canvas = RgbaImage::new(
-        layout.settings().max_width.unwrap() as u32,
-        layout.settings().max_height.unwrap() as u32,
+        layout.settings().max_width.unwrap_or_default() as u32,
+        layout.settings().max_height.unwrap_or_default() as u32,
     );
 
     // Generate blot pattern
@@ -219,8 +245,8 @@ pub fn generate_text_layer(
     for theta in 0..360 {
         let theta_rad = theta as f32 * PI / 180.0;
         let point = (
-            (blot_radius * theta_rad.cos()) as i64,
-            (blot_radius * theta_rad.sin()) as i64,
+            (blot_radius * theta_rad.cos()) as i32,
+            (blot_radius * theta_rad.sin()) as i32,
         );
         if !blot_pattern.contains(&point) {
             blot_pattern.push(point);
@@ -231,22 +257,25 @@ pub fn generate_text_layer(
     for glyph in layout.glyphs() {
         // Generate pixel layout for each glyph
         let (metrics, bytes) = font.rasterize_config(glyph.key);
+        let glyph_start = (glyph.x as u32, glyph.y as u32);
 
         // Print pixels to the canvas
         for x in 0..metrics.width {
             for y in 0..metrics.height {
                 // Get coverage data from rasterization
                 let byte_index = y * metrics.width + x;
-                let mask = bytes.get(byte_index).expect("Failed to get glyph data!");
-
-                // Blot pixels around the rendered pixel
-                for blot_pattern_point in &blot_pattern {
-                    let blot_point = (
-                        (glyph.x as i64 + x as i64 + blot_pattern_point.0) as u32,
-                        (glyph.y as i64 + y as i64 + blot_pattern_point.1) as u32,
-                    );
-                    if let Some(p) = text_canvas.get_pixel_mut_checked(blot_point.0, blot_point.1) {
-                        p.blend(&Rgba([text_color[0], text_color[1], text_color[2], *mask]))
+                if let Some(mask) = bytes.get(byte_index) {
+                    // Blot pixels around the rendered pixel
+                    for blot_pattern_point in &blot_pattern {
+                        let blot_point = (
+                            (glyph_start.0 + x as u32).saturating_add_signed(blot_pattern_point.0),
+                            (glyph_start.1 + y as u32).saturating_add_signed(blot_pattern_point.1),
+                        );
+                        if let Some(p) =
+                            text_canvas.get_pixel_mut_checked(blot_point.0, blot_point.1)
+                        {
+                            p.blend(&Rgba([text_color[0], text_color[1], text_color[2], *mask]));
+                        }
                     }
                 }
             }
@@ -258,11 +287,11 @@ pub fn generate_text_layer(
 
 /// Overlay a text layer with transparency onto the base image. To simulate a
 /// drop shadow, increase the starting position to move the canvas down/right.
-pub fn overlay_layer_on_image(image: &mut RgbaImage, text_canvas: &RgbaImage, start: (u32, u32)) {
-    for (x, y, overlay_pixel) in text_canvas.enumerate_pixels() {
+pub fn blend_layer_onto_image(image: &mut RgbaImage, layer: &RgbaImage, start: (u32, u32)) {
+    for (x, y, overlay_pixel) in layer.enumerate_pixels() {
         if overlay_pixel.0[3] != 0 {
             if let Some(p) = image.get_pixel_mut_checked(start.0 + x, start.1 + y) {
-                p.blend(overlay_pixel)
+                p.blend(overlay_pixel);
             };
         }
     }
@@ -270,7 +299,7 @@ pub fn overlay_layer_on_image(image: &mut RgbaImage, text_canvas: &RgbaImage, st
 
 /// Given one text field, generates all text effects and layers them onto the
 /// base image.
-#[allow(clippy::cast_sign_loss)]
+//#[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_precision_loss)]
 #[allow(clippy::cast_possible_truncation)]
 fn render_text_field_on_image(
@@ -320,7 +349,7 @@ fn render_text_field_on_image(
     if let Some(shadow_color) = text_field.shadow_color {
         let shadow_offset = (text_size * 0.06) as i32;
         let shadow_canvas = generate_text_layer(&layout, font, shadow_color, 0.0);
-        overlay_layer_on_image(
+        blend_layer_onto_image(
             &mut image,
             &shadow_canvas,
             (
@@ -334,7 +363,7 @@ fn render_text_field_on_image(
     if let Some(border_color) = text_field.border_color {
         let border_size = text_size * 0.03;
         let border_canvas = generate_text_layer(&layout, font, border_color, border_size);
-        overlay_layer_on_image(
+        blend_layer_onto_image(
             &mut image,
             &border_canvas,
             (text_field.start[0], text_field.start[1]),
@@ -342,7 +371,7 @@ fn render_text_field_on_image(
     };
 
     // Add text layer
-    overlay_layer_on_image(
+    blend_layer_onto_image(
         &mut image,
         &text_canvas,
         (text_field.start[0], text_field.start[1]),
