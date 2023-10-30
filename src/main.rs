@@ -2,10 +2,12 @@
 //! This is the HTTP server portion of the crate.
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use automeme::{add_text_to_image, get_template_data, load_templates, Template, TextField};
-use image::RgbImage;
+use automeme::{
+    get_template_from_disk, get_template_names, render_template, startup_check_all_resources,
+    Template, TextField,
+};
+use image::RgbaImage;
 use maud::{html, Markup};
-use std::collections::HashMap;
 use std::env;
 use std::io::{Cursor, Result, Seek, SeekFrom};
 
@@ -52,7 +54,7 @@ fn regex_text_fields(
 }
 
 /// Streams the image data to the client and tells them it's a PNG file.
-fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
+fn serve_image_to_client(image: &RgbaImage) -> HttpResponse {
     let mut png_data = Cursor::new(Vec::new());
     image
         .write_to(&mut png_data, image::ImageOutputFormat::Png)
@@ -69,7 +71,8 @@ fn serve_image_to_client(image: &RgbImage) -> HttpResponse {
 
 /// Index of all templates with a little help text.
 #[get("/")]
-async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
+async fn template_index() -> Result<Markup> {
+    let template_list = get_template_names().unwrap();
     Ok(html! {
         html {
             head {
@@ -86,11 +89,11 @@ async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Resu
                 p {
                     "If you want to edit the text of a meme, or add text to a meme with no default text, you can use the " strong { "/f" } " or " strong { "/s" } " options. The " strong { "/f " } " option allows you to overwrite the text of a meme to your own, like adding \"mfw code doesn't compile\" to the surprised pikachu template. To do this, take the default image path like " a href="pikachu" { "/pikachu" } " and add /f/{your-text} to make " a href="pikachu/f/mfw-code-doesn't-compile" { "/pikachu/f/mfw-code-doesn't-compile" } ". The " strong { "/s" } " option replaces existing text in the template to your own with the pattern /s/{old-text}/{new-text}, allowing you to quickly turn \"Wouldn't you like to know, weather boy?\" into " a href="weatherboy/s/weather-boy/type-checker" { "\"Wouldn't you like to know, type checker?\"" } " For memes with multiple fields, use | to move to the next field. Spaces are substituted from both - and _."
                 }
-                @for template in templates.values() {
-                    a href=(template.template_name) {
+                @for template_name in template_list {
+                    a href=(template_name) {
                         img
-                            src=(template.template_name)
-                            title=(template.template_name)
+                            src=(template_name)
+                            title=(template_name)
                             style="max-height:250px; max-width:300px; margin:20px;"
                             {}
                     }
@@ -105,7 +108,8 @@ async fn template_index(templates: web::Data<HashMap<String, Template>>) -> Resu
 
 /// Renders all templates with lorem ipsum text for bounds testing.
 #[get("/lorem")]
-async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -> Result<Markup> {
+async fn template_index_lorem() -> Result<Markup> {
+    let template_list = get_template_names().unwrap();
     Ok(html! {
         html {
             head {
@@ -115,12 +119,12 @@ async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -
                 p {
                     a href=("/") { "Back to normal index." }
                 }
-                @for template in templates.values() {
-                    @let path = format!("{}/l", template.template_name);
+                @for template_name in template_list {
+                    @let path = format!("{}/l", template_name);
                     a href=(path) {
                         img
                             src=(path)
-                            title=(template.template_name)
+                            title=(template_name)
                             style="max-height:350px; max-width:400px; margin:20px;"
                             {}
                     }
@@ -132,18 +136,12 @@ async fn template_index_lorem(templates: web::Data<HashMap<String, Template>>) -
 
 /// Finds a template by name and renders it with default settings.
 #[get("/{template_name}")]
-async fn template_default(
-    path: web::Path<String>,
-    templates: web::Data<HashMap<String, Template>>,
-) -> impl Responder {
+async fn template_default(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
-    println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            let mut image = template.image;
-            for text_field in template.text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            println!("Serving template {} as default", &template_name);
+            let image = render_template(template);
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -152,22 +150,19 @@ async fn template_default(
 
 /// Renders a template with entirely user-given text.
 #[get("/{template_name}/f/{full_text}")]
-async fn template_fulltext(
-    path: web::Path<(String, String)>,
-    templates: web::Data<HashMap<String, Template>>,
-) -> impl Responder {
+async fn template_fulltext(path: web::Path<(String, String)>) -> impl Responder {
     let (template_name, full_text) = path.into_inner();
-    println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            let mut image = template.image;
+            println!("Serving template {} with fulltext", &template_name);
             let text_fields = override_text_fields(
                 template.text_fields,
                 clean_text_to_vec(path_to_clean_text(full_text)),
             );
-            for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(Template {
+                text_fields,
+                ..template
+            });
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -176,20 +171,17 @@ async fn template_fulltext(
 
 /// Renders a template with lorem ipsum text.
 #[get("/{template_name}/l")]
-async fn template_lorem(
-    path: web::Path<String>,
-    templates: web::Data<HashMap<String, Template>>,
-) -> impl Responder {
+async fn template_lorem(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
-    println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            let mut image = template.image;
+            println!("Serving template {} with lorem", &template_name);
             let lorem_vec = vec![String::from(LOREM_IPSUM); template.text_fields.len()];
             let text_fields = override_text_fields(template.text_fields, lorem_vec);
-            for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(Template {
+                text_fields,
+                ..template
+            });
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -198,23 +190,20 @@ async fn template_lorem(
 
 /// Renders a template by replacing text via a simple pattern.
 #[get("/{template_name}/s/{old_text}/{new_text}")]
-async fn template_sed(
-    path: web::Path<(String, String, String)>,
-    templates: web::Data<HashMap<String, Template>>,
-) -> impl Responder {
+async fn template_sed(path: web::Path<(String, String, String)>) -> impl Responder {
     let (template_name, old_text, new_text) = path.into_inner();
-    println!("Serving template {}", &template_name);
-    match get_template_data(template_name, &templates) {
+    match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            let mut image = template.image;
+            println!("Serving template {} with sed", &template_name);
             let text_fields = regex_text_fields(
                 template.text_fields,
                 path_to_clean_text(old_text),
                 path_to_clean_text(new_text),
             );
-            for text_field in text_fields {
-                image = add_text_to_image(&text_field, image, &template.font);
-            }
+            let image = render_template(Template {
+                text_fields,
+                ..template
+            });
             serve_image_to_client(&image)
         }
         None => HttpResponse::NotFound().finish(),
@@ -224,12 +213,12 @@ async fn template_sed(
 /// Server startup tasks.
 #[actix_web::main]
 async fn main() -> Result<()> {
+    // Validate resources
+    let num_templates = startup_check_all_resources().unwrap();
+    println!("Server started: {} templates validated.", num_templates);
     // Start the server
-    let templates = load_templates();
-    println!("Loaded {} templates.", templates.len());
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(templates.clone()))
             .service(template_index)
             .service(template_index_lorem)
             .service(template_default)
@@ -249,10 +238,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_index() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -268,10 +255,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_default() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -287,10 +272,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_fulltext() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -308,10 +291,8 @@ mod tests {
 
     #[actix_web::test]
     async fn test_template_pikachu_lorem() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -328,10 +309,8 @@ mod tests {
     #[actix_web::test]
     #[ignore]
     async fn test_templates_all_default() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -340,9 +319,9 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        for template_name in templates.keys() {
+        for template_name in get_template_names().unwrap() {
             let req = test::TestRequest::default()
-                .uri(&("/".to_owned() + template_name))
+                .uri(&format!("/{}", template_name))
                 .to_request();
             let resp = test::call_service(&app, req).await;
             assert!(resp.status().is_success());
@@ -352,10 +331,8 @@ mod tests {
     #[actix_web::test]
     #[ignore]
     async fn test_templates_all_fulltext() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -364,9 +341,9 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        for template_name in templates.keys() {
+        for template_name in get_template_names().unwrap() {
             let req = test::TestRequest::default()
-                .uri(&("/".to_owned() + template_name + "/f/a"))
+                .uri(&format!("/{}/f/a", template_name))
                 .to_request();
             let resp = test::call_service(&app, req).await;
             assert!(resp.status().is_success());
@@ -376,10 +353,8 @@ mod tests {
     #[actix_web::test]
     #[ignore]
     async fn test_templates_all_lorem() {
-        let templates = load_templates();
         let app = test::init_service(
             App::new()
-                .app_data(web::Data::new(templates.clone()))
                 .service(template_index)
                 .service(template_index_lorem)
                 .service(template_default)
@@ -388,9 +363,9 @@ mod tests {
                 .service(template_sed),
         )
         .await;
-        for template_name in templates.keys() {
+        for template_name in get_template_names().unwrap() {
             let req = test::TestRequest::default()
-                .uri(&("/".to_owned() + template_name + "/l"))
+                .uri(&format!("/{}/l", template_name))
                 .to_request();
             let resp = test::call_service(&app, req).await;
             assert!(resp.status().is_success());
