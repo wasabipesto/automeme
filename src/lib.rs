@@ -30,8 +30,6 @@ const FONT_GEOMETRY_SCALE: f32 = 60.0;
 /// files before the full template struct is built.
 #[derive(Debug, Deserialize, Clone)]
 pub struct TemplateJSON {
-    /// The name of the template as referenced in urls and lookup keys
-    pub template_name: String,
     /// The relative path of the base image from the project root, also used as a lookup key
     pub image_path: String,
     /// The relative path of the font from the project root, also used as a lookup key
@@ -44,7 +42,6 @@ pub struct TemplateJSON {
 /// passed to the render fuction to get a completed image.
 #[derive(Debug, Clone)]
 pub struct Template {
-    // template_name: String,
     pub image: RgbaImage,
     pub font: Font,
     pub text_fields: Vec<TextField>,
