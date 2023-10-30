@@ -5,10 +5,10 @@
 
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
-#![allow(clippy::unused_async)]
 #![allow(clippy::needless_pass_by_value)]
 #![allow(clippy::must_use_candidate)]
 
+use core::f32::consts::PI;
 use core::u8;
 use fontdue::layout::{
     CoordinateSystem, HorizontalAlign, Layout, LayoutSettings, TextStyle, VerticalAlign, WrapStyle,
@@ -16,14 +16,14 @@ use fontdue::layout::{
 use fontdue::{Font, FontSettings};
 use glob::glob;
 use image::{Pixel, Rgba, RgbaImage};
-// use rand::seq::IteratorRandom;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::f32::consts::PI;
-use std::fs::{metadata, File};
+use std::fs::{metadata, read_to_string, File};
 use std::io::Read;
 use std::path::PathBuf;
 
+/// Sets the scale at which fonts are imported. Works best if this is close to
+/// the average size that text is rendered on images.
 const FONT_GEOMETRY_SCALE: f32 = 60.0;
 
 /// Data from the JSON template files. This struct is only used to deserialize the
@@ -89,7 +89,7 @@ pub fn get_template_names() -> Result<Vec<String>, String> {
             let file_str = file_stem
                 .to_str()
                 .ok_or("Failed to convert OsStr to string")?;
-            Ok(file_str.to_string())
+            Ok(file_str.to_owned())
         })
         .collect();
 
@@ -107,8 +107,8 @@ fn get_json_from_disk(template_name: &String) -> Result<Option<TemplateJSON>, St
     if !file_path.exists() {
         return Ok(None);
     }
-    let json_string = std::fs::read_to_string(&file_path)
-        .map_err(|e| format!("Failed to read JSON file: {e}"))?;
+    let json_string =
+        read_to_string(&file_path).map_err(|e| format!("Failed to read JSON file: {e}"))?;
     let template_json: TemplateJSON = serde_json::from_str(&json_string)
         .map_err(|e| format!("Failed to deserialize JSON: {e}"))?;
 
