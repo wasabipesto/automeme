@@ -5,31 +5,36 @@ use automeme::{
     startup_load_all_resources,
 };
 use criterion::{criterion_group, criterion_main, Criterion};
+use std::time::Duration;
 
-pub fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("get names from template files", |b| {
+pub fn standard_benches(c: &mut Criterion) {
+    let mut group = c.benchmark_group("automeme");
+    group
+        .sample_size(100)
+        .noise_threshold(0.05)
+        .warm_up_time(Duration::new(2, 0))
+        .measurement_time(Duration::new(10, 0));
+
+    group.bench_function("get names from template files", |b| {
         b.iter(|| get_template_names())
     });
 
-    c.bench_function("load one template and resources from disk", |b| {
+    group.bench_function("load one template and resources from disk", |b| {
         b.iter(|| get_template_from_disk(&"weatherboy".to_owned()))
     });
 
-    c.bench_function("load all templates and validate all resources", |b| {
+    group.bench_function("load all templates and validate all resources", |b| {
         b.iter(|| startup_check_all_resources())
-    });
-    c.bench_function("load all templates and all resources into memory", |b| {
-        b.iter(|| startup_load_all_resources())
     });
 
     let template = get_template_from_disk(&"weatherboy".to_owned())
         .unwrap()
         .unwrap();
-    c.bench_function("render a loaded template", |b| {
+    group.bench_function("render a loaded template", |b| {
         b.iter(|| render_template(template.clone()))
     });
 
-    c.bench_function("load and render a template by name", |b| {
+    group.bench_function("load and render a template by name", |b| {
         b.iter(|| {
             let template = get_template_from_disk(&"weatherboy".to_owned())
                 .unwrap()
@@ -37,7 +42,24 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             render_template(template);
         })
     });
+
+    group.finish();
 }
 
-criterion_group!(benches, criterion_benchmark);
+pub fn long_benches(c: &mut Criterion) {
+    let mut group = c.benchmark_group("automeme");
+    group
+        .sample_size(10)
+        .noise_threshold(0.05)
+        .warm_up_time(Duration::new(2, 0))
+        .measurement_time(Duration::new(30, 0));
+
+    group.bench_function("load all templates and all resources into memory", |b| {
+        b.iter(|| startup_load_all_resources())
+    });
+
+    group.finish();
+}
+
+criterion_group!(benches, standard_benches, long_benches);
 criterion_main!(benches);
