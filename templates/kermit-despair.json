@@ -1,7 +1,6 @@
 {
-    "template_name": "kermit-despair",
-    "image_path": "images/kermit-despair.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/kermit-despair.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

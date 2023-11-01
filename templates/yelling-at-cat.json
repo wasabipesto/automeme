@@ -1,7 +1,6 @@
 {
-    "template_name": "yelling-at-cat",
-    "image_path": "images/yelling-at-cat.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/yelling-at-cat.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

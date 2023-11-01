@@ -1,7 +1,6 @@
 {
-    "template_name": "finally",
-    "image_path": "images/finally.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/finally.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "finally",

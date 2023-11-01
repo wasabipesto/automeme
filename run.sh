@@ -1,32 +1,17 @@
 #!/bin/bash
-# automeme build and deploy script
-
-# test the binary before proceeding
-cargo test
-if [ $? != 0 ]; then
-    exit
-fi
-
-cargo clippy
-if [ $? != 0 ]; then
-    exit
-fi
+# automeme-web build and deploy script
 
 # build and deploy the docker image
-docker build -t automeme .
-if [ $? != 0 ]; then
-    exit
-fi
-
-docker stop automeme
-docker rm automeme
+docker build -t automeme-web . || exit
+docker stop automeme-web || exit
+docker rm automeme-web || exit
 docker run -d \
     -p 8888:8888 \
     --restart unless-stopped \
-    --name automeme \
-    automeme
+    --name automeme-web \
+    automeme-web
 
 # tail logs if requested
 if [ "$1" = "-f" ]; then
-    docker logs automeme -f
+    docker logs automeme-web -f
 fi

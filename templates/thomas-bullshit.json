@@ -1,7 +1,6 @@
 {
-    "template_name": "thomas-bullshit",
-    "image_path": "images/thomas-bullshit.png",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/thomas-bullshit.png",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "Thomas had never seen such bullshit before",

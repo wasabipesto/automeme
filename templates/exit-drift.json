@@ -1,7 +1,6 @@
 {
-    "template_name": "exit-drift",
-    "image_path": "images/exit-drift.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/exit-drift.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

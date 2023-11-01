@@ -1,7 +1,6 @@
 {
-    "template_name": "trap",
-    "image_path": "images/trap.jpeg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/trap.jpeg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "it's a trap",

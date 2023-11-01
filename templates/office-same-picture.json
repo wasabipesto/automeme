@@ -1,7 +1,6 @@
 {
-    "template_name": "office-same-picture",
-    "image_path": "images/office-same-picture.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/office-same-picture.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

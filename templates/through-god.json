@@ -1,7 +1,6 @@
 {
-    "template_name": "through-god",
-    "image_path": "images/through-god.png",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/through-god.png",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "Well, first of all, through God, all things are possible, so jot that down.",

@@ -1,7 +1,6 @@
 {
-    "template_name": "invincible-look",
-    "image_path": "images/invincible-look.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/invincible-look.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

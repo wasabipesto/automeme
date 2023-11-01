@@ -1,0 +1,17 @@
+[package]
+name = "automeme-web"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+keywords.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license-file.workspace = true
+edition.workspace = true
+
+[dependencies]
+automeme-core = { path = "../automeme-core" }
+actix-web = "4.4"
+image = "0.24"
+maud = { version = "0.25", features = ["actix-web"] }
+rand = "0.8"

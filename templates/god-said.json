@@ -1,7 +1,6 @@
 {
-    "template_name": "god-said",
-    "image_path": "images/god-said.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/god-said.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

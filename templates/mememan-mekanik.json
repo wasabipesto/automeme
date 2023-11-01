@@ -1,7 +1,6 @@
 {
-    "template_name": "mememan-mekanik",
-    "image_path": "images/mememan-mekanik.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/mememan-mekanik.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

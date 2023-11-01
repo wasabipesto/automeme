@@ -1,7 +1,6 @@
 {
-    "template_name": "always-has-been",
-    "image_path": "images/always-has-been.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/always-has-been.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "wait, it's all ohio?",

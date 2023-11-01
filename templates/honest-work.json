@@ -1,7 +1,6 @@
 {
-    "template_name": "honest-work",
-    "image_path": "images/honest-work.jpg",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/honest-work.jpg",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "It ain't much, but it's honest work.",

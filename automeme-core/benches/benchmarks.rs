@@ -1,6 +1,6 @@
 //! Benchmarks for the main crate
 
-use automeme::{
+use automeme_core::{
     get_template_from_disk, get_template_names, render_template, startup_check_all_resources,
     startup_load_all_resources,
 };
@@ -8,7 +8,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use std::time::Duration;
 
 pub fn standard_benches(c: &mut Criterion) {
-    let mut group = c.benchmark_group("automeme");
+    let mut group = c.benchmark_group("automeme-core");
     group
         .sample_size(100)
         .noise_threshold(0.05)
@@ -16,15 +16,19 @@ pub fn standard_benches(c: &mut Criterion) {
         .measurement_time(Duration::new(10, 0));
 
     group.bench_function("get names from template files", |b| {
-        b.iter(|| get_template_names())
+        b.iter(|| get_template_names().unwrap())
     });
 
     group.bench_function("load one template and resources from disk", |b| {
-        b.iter(|| get_template_from_disk(&"weatherboy".to_owned()))
+        b.iter(|| {
+            get_template_from_disk(&"weatherboy".to_owned())
+                .unwrap()
+                .unwrap()
+        })
     });
 
     group.bench_function("load all templates and validate all resources", |b| {
-        b.iter(|| startup_check_all_resources())
+        b.iter(|| startup_check_all_resources().unwrap())
     });
 
     let template = get_template_from_disk(&"weatherboy".to_owned())
@@ -47,7 +51,7 @@ pub fn standard_benches(c: &mut Criterion) {
 }
 
 pub fn long_benches(c: &mut Criterion) {
-    let mut group = c.benchmark_group("automeme");
+    let mut group = c.benchmark_group("automeme-core");
     group
         .sample_size(10)
         .noise_threshold(0.05)

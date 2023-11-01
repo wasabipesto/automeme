@@ -1,7 +1,6 @@
 {
-    "template_name": "disgusted-girl",
-    "image_path": "images/disgusted-girl.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/disgusted-girl.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

@@ -1,7 +1,6 @@
 {
-    "template_name": "trust-nobody",
-    "image_path": "images/trust-nobody.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/trust-nobody.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "trust nobody",

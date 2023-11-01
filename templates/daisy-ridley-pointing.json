@@ -1,7 +1,6 @@
 {
-    "template_name": "daisy-ridley-pointing",
-    "image_path": "images/daisy-ridley-pointing.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/daisy-ridley-pointing.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

@@ -1,7 +1,6 @@
 {
-    "template_name": "1984",
-    "image_path": "images/1984.jpg",
-    "font_path": "fonts/BebasNeue-Regular.ttf",
+    "image_path": "templates/1984.jpg",
+    "font_path": "templates/fonts/BebasNeue-Regular.ttf",
     "text_fields": [
         {
             "text": "",

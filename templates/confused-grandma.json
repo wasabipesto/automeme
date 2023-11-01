@@ -1,7 +1,6 @@
 {
-    "template_name": "confused-grandma",
-    "image_path": "images/confused-grandma.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/confused-grandma.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

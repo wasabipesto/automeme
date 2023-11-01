@@ -1,7 +1,6 @@
 {
-    "template_name": "one-does-not-simply",
-    "image_path": "images/one-does-not-simply.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/one-does-not-simply.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "one does not simply",

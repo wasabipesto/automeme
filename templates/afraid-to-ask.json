@@ -1,7 +1,6 @@
 {
-    "template_name": "afraid-to-ask",
-    "image_path": "images/afraid-to-ask.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/afraid-to-ask.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "I don't know who that is",

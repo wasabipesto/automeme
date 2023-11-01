@@ -1,7 +1,6 @@
 {
-    "template_name": "back-up",
-    "image_path": "images/back-up.jpg",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/back-up.jpg",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "",

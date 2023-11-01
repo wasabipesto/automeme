@@ -1,7 +1,6 @@
 {
-    "template_name": "spiderman-explain",
-    "image_path": "images/spiderman-explain.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/spiderman-explain.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

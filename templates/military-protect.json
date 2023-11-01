@@ -1,7 +1,6 @@
 {
-    "template_name": "military-protect",
-    "image_path": "images/military-protect.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/military-protect.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

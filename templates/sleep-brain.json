@@ -1,7 +1,6 @@
 {
-    "template_name": "sleep-brain",
-    "image_path": "images/sleep-brain.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/sleep-brain.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

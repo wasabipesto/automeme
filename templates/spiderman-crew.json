@@ -1,7 +1,6 @@
 {
-    "template_name": "spiderman-crew",
-    "image_path": "images/spiderman-crew.png",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/spiderman-crew.png",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "me and the boys",

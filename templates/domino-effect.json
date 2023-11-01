@@ -1,7 +1,6 @@
 {
-    "template_name": "domino-effect",
-    "image_path": "images/domino-effect.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/domino-effect.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

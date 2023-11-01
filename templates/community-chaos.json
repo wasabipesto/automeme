@@ -1,7 +1,6 @@
 {
-    "template_name": "community-chaos",
-    "image_path": "images/community-chaos.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/community-chaos.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

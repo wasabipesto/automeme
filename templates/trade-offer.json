@@ -1,7 +1,6 @@
 {
-    "template_name": "trade-offer",
-    "image_path": "images/trade-offer.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/trade-offer.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

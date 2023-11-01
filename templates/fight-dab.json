@@ -1,7 +1,6 @@
 {
-    "template_name": "fight-dab",
-    "image_path": "images/fight-dab.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/fight-dab.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

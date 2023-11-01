@@ -1,7 +1,6 @@
 {
-    "template_name": "eggman-button",
-    "image_path": "images/eggman-button.jpg",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/eggman-button.jpg",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "",

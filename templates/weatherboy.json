@@ -1,7 +1,6 @@
 {
-    "template_name": "weatherboy",
-    "image_path": "images/weatherboy.png",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/weatherboy.png",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "Wouldn't you like to know, weather boy?",

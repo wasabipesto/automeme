@@ -1,8 +1,14 @@
-//! Automeme generates memes and serves them over HTTP in a human-friendly way.
-//! This is the HTTP server portion of the crate.
+//! Automeme-web serves memes over HTTP in a human-friendly way.
+//! URLs are designed to be easily type-able to predictably generate the
+//! desired image, and then fetched by e.g. a chatroom's link preview service.
+
+#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::unused_async)]
+#![allow(clippy::needless_pass_by_value)]
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-use automeme::{
+use automeme_core::{
     get_template_from_disk, get_template_names, render_template, startup_check_all_resources,
     Template, TextField,
 };
@@ -120,7 +126,7 @@ async fn template_index_lorem() -> Result<Markup> {
                     a href=("/") { "Back to normal index." }
                 }
                 @for template_name in template_list {
-                    @let path = format!("{}/l", template_name);
+                    @let path = format!("{template_name}/l");
                     a href=(path) {
                         img
                             src=(path)
@@ -140,7 +146,7 @@ async fn template_default(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            println!("Serving template {} as default", &template_name);
+            println!("Serving template {template_name} as default");
             let image = render_template(template);
             serve_image_to_client(&image)
         }
@@ -154,7 +160,7 @@ async fn template_fulltext(path: web::Path<(String, String)>) -> impl Responder 
     let (template_name, full_text) = path.into_inner();
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            println!("Serving template {} with fulltext", &template_name);
+            println!("Serving template {template_name} with fulltext");
             let text_fields = override_text_fields(
                 template.text_fields,
                 clean_text_to_vec(path_to_clean_text(full_text)),
@@ -175,7 +181,7 @@ async fn template_lorem(path: web::Path<String>) -> impl Responder {
     let template_name = path.into_inner();
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            println!("Serving template {} with lorem", &template_name);
+            println!("Serving template {template_name} with lorem");
             let lorem_vec = vec![String::from(LOREM_IPSUM); template.text_fields.len()];
             let text_fields = override_text_fields(template.text_fields, lorem_vec);
             let image = render_template(Template {
@@ -194,7 +200,7 @@ async fn template_sed(path: web::Path<(String, String, String)>) -> impl Respond
     let (template_name, old_text, new_text) = path.into_inner();
     match get_template_from_disk(&template_name).unwrap() {
         Some(template) => {
-            println!("Serving template {} with sed", &template_name);
+            println!("Serving template {template_name} with sed");
             let text_fields = regex_text_fields(
                 template.text_fields,
                 path_to_clean_text(old_text),
@@ -215,7 +221,7 @@ async fn template_sed(path: web::Path<(String, String, String)>) -> impl Respond
 async fn main() -> Result<()> {
     // Validate resources
     let num_templates = startup_check_all_resources().unwrap();
-    println!("Server started: {} templates validated.", num_templates);
+    println!("Server started: {num_templates} templates validated.");
     // Start the server
     HttpServer::new(move || {
         App::new()

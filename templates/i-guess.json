@@ -1,7 +1,6 @@
 {
-    "template_name": "i-guess",
-    "image_path": "images/i-guess.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/i-guess.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

@@ -1,7 +1,6 @@
 {
-    "template_name": "mememan-kemist",
-    "image_path": "images/mememan-kemist.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/mememan-kemist.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

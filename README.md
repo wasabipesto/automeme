@@ -1,30 +1,10 @@
 # 😂 automeme
 
-Automeme generates memes and serves them over HTTP in a human-friendly way. URLs are designed to be easily type-able to predictably generate the desired image, and then fetched by e.g. a chatroom's link preview service.
+Automeme is a reasonably-fast, reasonably-simple meme generation tool.
 
-## Methods
+## Quickstart
 
-### Default
-
-`/{template_name}`
-
-Generates a template with default settings.
-
-### Full-Text
-
-`/{template_name}/f/{full_text}`
-
-Replaces all text in the template with the given text. Use `|` to move to the next section.
-
-### Sed
-
-`/{template_name}/s/{old_text}/{new_text}`
-
-Replaces text in the template with the given regular expression. No pattern matching, just basic replacement.
-
-## Running
-
-You can build this in rust:
+Once I actually issue a release, you'll be able to download and run that. In the meantime you'll have to build it yourself:
 
 ```
 # Install rust
@@ -36,33 +16,23 @@ cd automeme
 
 # Test or run clippy
 cargo test
+cargo test -- --include-ignored
 cargo clippy
+cargo clippy -- -W clippy::pedantic -W clippy::restriction
 
-# Build the binary
-cargo build -r
-target/release/automeme
-
-# Or run directly
-cargo run -r
+# Run the webserver
+cargo run -r --bin automeme-web
 ```
 
-You can build and run with Docker:
+## Structure
 
-```
-# Clone this repo
-git clone git@github.com:wasabipesto/automeme.git
-cd automeme
+This monorepo includes:
 
-# Build the image
-docker build -t automeme .
-
-# Run the image
-docker run -d \
-    -p 8888:8888 \
-    --restart unless-stopped \
-    --name automeme \
-    automeme
-```
+- `automeme-core`, a core library that handles all the template loading, image processing, and text rendering
+- `automeme-web`, a simple web server frontend for `automeme-core`
+- `automeme-cli`, a work-in-progress CLI frontend for `automeme-core`
+- `templates`, a bunch of json and image files used as the basis for each meme
+  - This directory is symlinked to from each package's directory only for the test functions, which [run from the package directory and not the workspace directory.](https://github.com/rust-lang/cargo/issues/11852)
 
 ## Sources
 

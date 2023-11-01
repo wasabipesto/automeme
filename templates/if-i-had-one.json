@@ -1,7 +1,6 @@
 {
-    "template_name": "if-i-had-one",
-    "image_path": "images/if-i-had-one.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/if-i-had-one.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "this is where I would put my trophy",

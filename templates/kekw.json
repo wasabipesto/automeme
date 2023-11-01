@@ -1,7 +1,6 @@
 {
-    "template_name": "kekw",
-    "image_path": "images/kekw.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/kekw.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

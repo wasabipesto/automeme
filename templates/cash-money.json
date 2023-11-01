@@ -1,7 +1,6 @@
 {
-    "template_name": "cash-money",
-    "image_path": "images/cash-money.png",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/cash-money.png",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "that wasn't very cash money of you",

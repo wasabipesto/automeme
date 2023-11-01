@@ -1,7 +1,6 @@
 {
-    "template_name": "bike-sabotage",
-    "image_path": "images/bike-sabotage.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/bike-sabotage.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

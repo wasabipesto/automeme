@@ -1,7 +1,6 @@
 {
-    "template_name": "cat-wtf",
-    "image_path": "images/cat-wtf.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/cat-wtf.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

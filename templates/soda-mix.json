@@ -1,7 +1,6 @@
 {
-    "template_name": "soda-mix",
-    "image_path": "images/soda-mix.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/soda-mix.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

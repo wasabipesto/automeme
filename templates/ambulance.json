@@ -1,7 +1,6 @@
 {
-    "template_name": "call-an-ambulance",
-    "image_path": "images/ambulance.jpg",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/ambulance.jpg",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "Call an ambulance!",

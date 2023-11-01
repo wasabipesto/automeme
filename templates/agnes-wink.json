@@ -1,7 +1,6 @@
 {
-    "template_name": "agnes-wink",
-    "image_path": "images/agnes-wink.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/agnes-wink.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

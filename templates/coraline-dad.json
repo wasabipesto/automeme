@@ -1,7 +1,6 @@
 {
-    "template_name": "coraline-dad",
-    "image_path": "images/coraline-dad.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/coraline-dad.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

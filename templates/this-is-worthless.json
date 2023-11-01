@@ -1,7 +1,6 @@
 {
-    "template_name": "this-is-worthless",
-    "image_path": "images/this-is-worthless.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/this-is-worthless.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

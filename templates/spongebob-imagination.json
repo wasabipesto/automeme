@@ -1,7 +1,6 @@
 {
-    "template_name": "spongebob-imagination",
-    "image_path": "images/spongebob-imagination.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/spongebob-imagination.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "imagination",

@@ -1,7 +1,6 @@
 {
-    "template_name": "spiderman-hey",
-    "image_path": "images/spiderman-hey.jpg",
-    "font_path": "fonts/Gabarito-Bold.ttf",
+    "image_path": "templates/spiderman-hey.jpg",
+    "font_path": "templates/fonts/Gabarito-Bold.ttf",
     "text_fields": [
         {
             "text": "hey",

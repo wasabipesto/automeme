@@ -1,7 +1,6 @@
 {
-    "template_name": "kowalski-point",
-    "image_path": "images/kowalski-point.jpg",
-    "font_path": "fonts/Gabarito-Regular.ttf",
+    "image_path": "templates/kowalski-point.jpg",
+    "font_path": "templates/fonts/Gabarito-Regular.ttf",
     "text_fields": [
         {
             "text": "",

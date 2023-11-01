@@ -1,7 +1,6 @@
 {
-    "template_name": "nemo-mine",
-    "image_path": "images/nemo-mine.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/nemo-mine.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

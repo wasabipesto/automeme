@@ -1,7 +1,6 @@
 {
-    "template_name": "disappear",
-    "image_path": "images/disappear.jpeg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/disappear.jpeg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "",

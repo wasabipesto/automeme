@@ -1,7 +1,5 @@
-//! Automeme generates memes and serves them over HTTP in a human-friendly way.
-//! URLs are designed to be easily type-able to predictably generate the
-//! desired image, and then fetched by e.g. a chatroom's link preview service.
-//! This is the image loading and generation portion of the crate.
+//! Automeme-core is a reasonably-fast, reasonably-simple meme generation tool.
+//! It is used primarily in conjunction with the frontend automeme-web.
 
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]

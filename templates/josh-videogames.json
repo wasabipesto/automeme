@@ -1,7 +1,6 @@
 {
-    "template_name": "josh-videogames",
-    "image_path": "images/josh-videogames.jpg",
-    "font_path": "fonts/Anton-Regular.ttf",
+    "image_path": "templates/josh-videogames.jpg",
+    "font_path": "templates/fonts/Anton-Regular.ttf",
     "text_fields": [
         {
             "text": "videogames",
